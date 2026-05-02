@@ -72,6 +72,7 @@ function AreaChart({ data }: { data: { hour: string; kwh: number }[] }) {
 
 export default function Solar() {
   const { data, isLive } = useSolarData();
+  const { t } = useLanguage();
   const total = data.reduce((s, d) => s + d.kwh, 0);
   const peak = data.reduce((m, d) => (d.kwh > m.kwh ? d : m), data[0]);
   const installed = mockData.installedCapacityKw;
@@ -80,27 +81,28 @@ export default function Solar() {
   const monthly = (total * 30).toFixed(0);
 
   return (
-    <Shell title="Solar Performance">
-      <div style={{ fontSize: 11, color: "var(--text-meta)" }}>{isLive ? "● LIVE · Open-Meteo" : "ESTIMATED"}</div>
+    <Shell title={t("topbar.title.solar") as string}>
+      <div style={{ fontSize: 11, color: "var(--text-meta)" }}>{isLive ? t("solar.live") : t("solar.estimated")}</div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
-        <Kpi label="Total Generated Today" value={total.toFixed(1)} unit="kWh" />
-        <Kpi label="Peak Output Hour" value={`${peak.hour}:00`} unit={`${peak.kwh.toFixed(1)} kWh`} />
-        <Kpi label="Capacity Utilization" value={`${utilization}`} unit={`% of ${installed}kW`} />
-        <Kpi label="Est. Monthly Generation" value={monthly} unit="kWh" />
+        <Kpi label={t("solar.kpi.totalGenerated") as string} value={total.toFixed(1)} unit="kWh" />
+        <Kpi label={t("solar.kpi.peakHour") as string} value={`${peak.hour}:00`} unit={`${peak.kwh.toFixed(1)} kWh`} />
+        <Kpi label={t("solar.kpi.utilization") as string} value={`${utilization}`} unit={t("solar.kpi.utilizationUnit", { kw: installed }) as string} />
+        <Kpi label={t("solar.kpi.monthly") as string} value={monthly} unit="kWh" />
       </div>
       <AreaChart data={data} />
       <div style={cardStyle}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 14 }}>PANEL GROUPS</div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 14 }}>{t("solar.panelGroups")}</div>
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
           <thead>
             <tr style={{ color: "var(--text-meta)", textAlign: "left" }}>
-              <th style={{ padding: "8px 8px", borderBottom: "1px solid var(--border)", fontWeight: 600 }}>Panel Group</th>
-              <th style={{ padding: "8px 8px", borderBottom: "1px solid var(--border)", fontWeight: 600 }}>Orientation</th>
-              <th style={{ padding: "8px 8px", borderBottom: "1px solid var(--border)", fontWeight: 600 }}>Rated Capacity</th>
-              <th style={{ padding: "8px 8px", borderBottom: "1px solid var(--border)", fontWeight: 600 }}>Today's Output</th>
-              <th style={{ padding: "8px 8px", borderBottom: "1px solid var(--border)", fontWeight: 600 }}>Efficiency</th>
+              <th style={{ padding: "8px 8px", borderBottom: "1px solid var(--border)", fontWeight: 600 }}>{t("solar.col.panelGroup")}</th>
+              <th style={{ padding: "8px 8px", borderBottom: "1px solid var(--border)", fontWeight: 600 }}>{t("solar.col.orientation")}</th>
+              <th style={{ padding: "8px 8px", borderBottom: "1px solid var(--border)", fontWeight: 600 }}>{t("solar.col.capacity")}</th>
+              <th style={{ padding: "8px 8px", borderBottom: "1px solid var(--border)", fontWeight: 600 }}>{t("solar.col.todayOutput")}</th>
+              <th style={{ padding: "8px 8px", borderBottom: "1px solid var(--border)", fontWeight: 600 }}>{t("solar.col.efficiency")}</th>
             </tr>
           </thead>
+
           <tbody>
             {mockData.panelGroups.map((p: any) => (
               <tr key={p.name} style={{ color: "var(--text-secondary)" }}>
