@@ -141,3 +141,10 @@
   background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--text-primary) 8%, transparent), transparent);
   animation: eduwatt-shimmer 1.4s infinite;
 }
+
+@media print {
+  .eduwatt-print-hide { display: none !important; }
+  .eduwatt-print-only { display: block !important; }
+  body, html, #root { background: #fff !important; color: #000 !important; }
+  .eduwatt-print-card { border: 1px solid #ccc !important; background: #fff !important; color: #000 !important; width: 100% !important; box-shadow: none !important; }
+}
