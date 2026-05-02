@@ -1,4 +1,5 @@
 import { mockData } from "@/data/mockData.js";
+import { useLanguage } from "@/context/LanguageContext";
 
 const cardStyle: React.CSSProperties = {
   background: "var(--bg-surface)",
@@ -60,12 +61,13 @@ function Card({
 
 export default function KpiRow() {
   const k = mockData.kpis;
+  const { t } = useLanguage();
   return (
     <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
-      <Card accent="var(--accent)" label="Solar Generated" value={k.solarGenerated.value} unit={k.solarGenerated.unit} delta={k.solarGenerated.delta} deltaPositive={k.solarGenerated.deltaPositive} />
-      <Card accent="var(--grid-color)" label="Grid Consumed" value={k.gridConsumed.value} unit={k.gridConsumed.unit} delta={k.gridConsumed.delta} deltaPositive={k.gridConsumed.deltaPositive} />
-      <Card accent="var(--co2-color)" label="CO₂ Avoided" value={k.co2Avoided.value} unit={k.co2Avoided.unit} delta={k.co2Avoided.delta} deltaPositive={k.co2Avoided.deltaPositive} />
-      <Card accent="var(--warn-color)" label="Waste Alerts" value={k.wasteAlerts.value} unit={k.wasteAlerts.unit} delta={k.wasteAlerts.delta} deltaPositive={k.wasteAlerts.deltaPositive} />
+      <Card accent="var(--accent)" label={t("kpi.solarGenerated") as string} value={k.solarGenerated.value} unit={k.solarGenerated.unit} delta={t("kpi.delta.vsYesterdayPos", { p: "8.2" }) as string} deltaPositive={k.solarGenerated.deltaPositive} />
+      <Card accent="var(--grid-color)" label={t("kpi.gridConsumed") as string} value={k.gridConsumed.value} unit={k.gridConsumed.unit} delta={t("kpi.delta.vsYesterdayNeg", { p: "4.1" }) as string} deltaPositive={k.gridConsumed.deltaPositive} />
+      <Card accent="var(--co2-color)" label={t("kpi.co2Avoided") as string} value={k.co2Avoided.value} unit={k.co2Avoided.unit} delta={t("kpi.delta.vsYesterdayPos", { p: "8.2" }) as string} deltaPositive={k.co2Avoided.deltaPositive} />
+      <Card accent="var(--warn-color)" label={t("kpi.wasteAlerts") as string} value={k.wasteAlerts.value} unit={t("kpi.unit.active") as string} delta={t("kpi.delta.unresolved", { n: 2 }) as string} deltaPositive={k.wasteAlerts.deltaPositive} />
     </div>
   );
 }

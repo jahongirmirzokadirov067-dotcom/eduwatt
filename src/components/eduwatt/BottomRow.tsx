@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { mockData } from "@/data/mockData.js";
 import { fetchAIRecommendations, type Recommendation } from "@/services/aiRecommendations";
+import { useLanguage } from "@/context/LanguageContext";
 
 const headingStyle: React.CSSProperties = {
   fontSize: 13,
@@ -17,6 +18,7 @@ const subStyle: React.CSSProperties = {
 };
 
 function AlertsPanel() {
+  const { t } = useLanguage();
   const colorFor = (s: string) =>
     s === "critical" ? "var(--crit-color)" : s === "warning" ? "var(--warn-color)" : "var(--co2-color)";
   return (
@@ -28,25 +30,31 @@ function AlertsPanel() {
         padding: 20,
       }}
     >
-      <div style={headingStyle}>ACTIVE ALERTS</div>
-      <div style={subStyle}>3 unresolved</div>
+      <div style={headingStyle}>{t("alerts.activeTitle")}</div>
+      <div style={subStyle}>{t("alerts.unresolvedCount", { n: 3 })}</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-        {mockData.alerts.map((a, i) => (
-          <div key={i} style={{ display: "flex", gap: 12 }}>
-            <div style={{ width: 6, height: 6, borderRadius: "50%", background: colorFor(a.severity), marginTop: 6, flexShrink: 0 }} />
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.45 }}>{a.message}</div>
-              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
-                <span style={{ fontSize: 10, color: "var(--text-faint)" }}>
-                  {a.timestamp} · {a.waste}
-                </span>
-                <a href="#" style={{ fontSize: 12, color: "var(--accent)", textDecoration: "none", fontWeight: 600 }}>
-                  {a.action} →
-                </a>
+        {mockData.alerts.map((a, i) => {
+          const idx = i + 1;
+          const message = t(`alert.${idx}.message`) as string;
+          const timestamp = t(`alert.${idx}.timestamp`) as string;
+          const action = t(`alert.${idx}.action`) as string;
+          return (
+            <div key={i} style={{ display: "flex", gap: 12 }}>
+              <div style={{ width: 6, height: 6, borderRadius: "50%", background: colorFor(a.severity), marginTop: 6, flexShrink: 0 }} />
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.45 }}>{message}</div>
+                <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
+                  <span style={{ fontSize: 10, color: "var(--text-faint)" }}>
+                    {timestamp} · {t("alerts.estWaste")}: {a.wasteKwhPerDay} kWh
+                  </span>
+                  <a href="#" style={{ fontSize: 12, color: "var(--accent)", textDecoration: "none", fontWeight: 600 }}>
+                    {action} →
+                  </a>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -79,9 +87,11 @@ function RefreshIcon() {
 }
 
 function RecommendationsPanel() {
+  const { t, lang } = useLanguage();
   const [recs, setRecs] = useState<Recommendation[]>(mockData.recommendations as Recommendation[]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [usedFallback, setUsedFallback] = useState(true);
 
   const load = async () => {
     setLoading(true);
@@ -99,9 +109,11 @@ function RecommendationsPanel() {
       };
       const result = await fetchAIRecommendations(snapshot);
       setRecs(result);
+      setUsedFallback(false);
     } catch (e: any) {
       setError(e?.message || "AI recommendations unavailable");
       setRecs(mockData.recommendations as Recommendation[]);
+      setUsedFallback(true);
     } finally {
       setLoading(false);
     }
@@ -111,6 +123,11 @@ function RecommendationsPanel() {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const localizedTitle = (r: Recommendation, i: number) =>
+    usedFallback ? (t(`rec.${i + 1}.title`) as string) : r.title;
+  const localizedDetail = (r: Recommendation, i: number) =>
+    usedFallback ? (t(`rec.${i + 1}.detail`) as string) : r.detail;
 
   return (
     <div
@@ -123,8 +140,8 @@ function RecommendationsPanel() {
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
         <div>
-          <div style={headingStyle}>AI RECOMMENDATIONS</div>
-          <div style={subStyle}>{loading ? "generating…" : error ? "estimated · cached" : "live · Lovable AI"}</div>
+          <div style={headingStyle}>{t("rec.title")}</div>
+          <div style={subStyle}>{loading ? t("rec.statusGenerating") : error ? t("rec.statusCached") : t("rec.statusLive")}</div>
         </div>
         <button
           type="button"
@@ -151,7 +168,7 @@ function RecommendationsPanel() {
 
       {error && (
         <div style={{ fontSize: 11, color: "var(--text-meta)", marginBottom: 12 }}>
-          AI recommendations unavailable — showing estimated values
+          {t("rec.unavailable")}
         </div>
       )}
 
@@ -189,7 +206,7 @@ function RecommendationsPanel() {
                         letterSpacing: "0.4px",
                       }}
                     >
-                      {r.priority}
+                      {t(`rec.priority.${r.priority}`)}
                     </span>
                     <span style={{ fontSize: 9, color: "var(--text-meta)", textTransform: "uppercase", letterSpacing: "0.4px" }}>
                       {r.category}
@@ -208,14 +225,14 @@ function RecommendationsPanel() {
                       {r.effort}
                     </span>
                   </div>
-                  <div style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 600, lineHeight: 1.35 }}>
-                    {r.title}
+                  <div style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 600, lineHeight: 1.35 }} key={`${lang}-t-${i}`}>
+                    {localizedTitle(r, i)}
                   </div>
                   <div style={{ fontSize: 12, color: "var(--rec-text)", lineHeight: 1.45, marginTop: 2 }}>
-                    {r.detail}
+                    {localizedDetail(r, i)}
                   </div>
                   <div style={{ fontSize: 11, color: "var(--accent)", marginTop: 4 }}>
-                    Saves {r.projectedSavingKwhPerDay} kWh/day · {r.projectedCo2KgPerMonth} kg CO₂/mo
+                    {t("rec.savesLine", { kwh: r.projectedSavingKwhPerDay, co2: r.projectedCo2KgPerMonth })}
                   </div>
                 </div>
               </div>

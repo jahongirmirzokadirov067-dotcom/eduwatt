@@ -1,7 +1,10 @@
 import { useTheme } from "@/hooks/useTheme";
+import { useLanguage } from "@/context/LanguageContext";
 
-export default function Topbar({ title = "Energy Overview" }: { title?: string }) {
+export default function Topbar({ title }: { title?: string }) {
   const { theme, toggle } = useTheme();
+  const { lang, setLang, t } = useLanguage();
+  const displayTitle = title || (t("topbar.title.overview") as string);
   return (
     <header
       style={{
@@ -23,7 +26,7 @@ export default function Topbar({ title = "Energy Overview" }: { title?: string }
           margin: 0,
         }}
       >
-        {title}
+        {displayTitle}
       </h1>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <div
@@ -50,8 +53,27 @@ export default function Topbar({ title = "Energy Overview" }: { title?: string }
               display: "inline-block",
             }}
           />
-          <span style={{ fontSize: 11, color: "var(--text-muted)" }}>LIVE</span>
+          <span style={{ fontSize: 11, color: "var(--text-muted)" }}>{t("topbar.live")}</span>
         </div>
+        <button
+          type="button"
+          onClick={() => setLang(lang === "en" ? "uz" : "en")}
+          aria-label="Toggle language"
+          style={{
+            background: "#1a1a1a",
+            border: `1px solid ${lang === "uz" ? "#C8FF00" : "#1e1e1e"}`,
+            borderRadius: 20,
+            padding: "4px 10px",
+            fontSize: 11,
+            fontWeight: 600,
+            color: lang === "uz" ? "#C8FF00" : "#f0ede6",
+            cursor: "pointer",
+            fontFamily: "inherit",
+            letterSpacing: "0.3px",
+          }}
+        >
+          {lang === "uz" ? "UZ" : "EN"}
+        </button>
         <button
           type="button"
           onClick={toggle}
@@ -69,7 +91,7 @@ export default function Topbar({ title = "Energy Overview" }: { title?: string }
             letterSpacing: "0.3px",
           }}
         >
-          {theme === "dark" ? "☾ DARK" : "☼ LIGHT"}
+          {theme === "dark" ? (t("topbar.theme.dark") as string) : (t("topbar.theme.light") as string)}
         </button>
       </div>
     </header>

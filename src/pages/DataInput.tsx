@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import Sidebar from "@/components/eduwatt/Sidebar";
 import Topbar from "@/components/eduwatt/Topbar";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface MonthlyRecord {
   month: string;
@@ -85,6 +86,7 @@ function parseCsv(text: string): MonthlyRecord[] {
 }
 
 function ManualForm({ onAdd }: { onAdd: (r: MonthlyRecord) => void }) {
+  const { t, lang } = useLanguage();
   const [form, setForm] = useState({
     month: "",
     gridConsumedKwh: "",
@@ -103,25 +105,25 @@ function ManualForm({ onAdd }: { onAdd: (r: MonthlyRecord) => void }) {
     const e: Record<string, string> = {};
     const today = new Date();
     const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
-    if (!form.month) e.month = "Required";
-    else if (form.month > currentMonth) e.month = "Must not be a future month";
+    if (!form.month) e.month = t("data.err.required") as string;
+    else if (form.month > currentMonth) e.month = t("data.err.future") as string;
     const grid = parseFloat(form.gridConsumedKwh);
-    if (!form.gridConsumedKwh) e.gridConsumedKwh = "Required";
-    else if (isNaN(grid) || grid < 0 || grid > 99999) e.gridConsumedKwh = "Must be 0–99999";
+    if (!form.gridConsumedKwh) e.gridConsumedKwh = t("data.err.required") as string;
+    else if (isNaN(grid) || grid < 0 || grid > 99999) e.gridConsumedKwh = t("data.err.range", { min: 0, max: 99999 }) as string;
     const peak = parseFloat(form.peakDemandKw);
-    if (!form.peakDemandKw) e.peakDemandKw = "Required";
-    else if (isNaN(peak) || peak < 0 || peak > 999) e.peakDemandKw = "Must be 0–999";
+    if (!form.peakDemandKw) e.peakDemandKw = t("data.err.required") as string;
+    else if (isNaN(peak) || peak < 0 || peak > 999) e.peakDemandKw = t("data.err.range", { min: 0, max: 999 }) as string;
     const bill = parseFloat(form.billUzs);
-    if (!form.billUzs) e.billUzs = "Required";
-    else if (isNaN(bill) || bill < 0) e.billUzs = "Must be ≥ 0";
+    if (!form.billUzs) e.billUzs = t("data.err.required") as string;
+    else if (isNaN(bill) || bill < 0) e.billUzs = t("data.err.geZero") as string;
     if (form.solarGeneratedKwh) {
       const s = parseFloat(form.solarGeneratedKwh);
-      if (isNaN(s) || s < 0 || s > 99999) e.solarGeneratedKwh = "Must be 0–99999";
+      if (isNaN(s) || s < 0 || s > 99999) e.solarGeneratedKwh = t("data.err.range", { min: 0, max: 99999 }) as string;
     }
     const days = parseInt(form.schoolDays, 10);
-    if (!form.schoolDays) e.schoolDays = "Required";
-    else if (isNaN(days) || days < 1 || days > 31) e.schoolDays = "Must be 1–31";
-    if (form.notes.length > 300) e.notes = "Max 300 characters";
+    if (!form.schoolDays) e.schoolDays = t("data.err.required") as string;
+    else if (isNaN(days) || days < 1 || days > 31) e.schoolDays = t("data.err.range", { min: 1, max: 31 }) as string;
+    if (form.notes.length > 300) e.notes = t("data.err.maxChars") as string;
     return e;
   };
 
@@ -141,8 +143,8 @@ function ManualForm({ onAdd }: { onAdd: (r: MonthlyRecord) => void }) {
     };
     onAdd(rec);
     const [yr, mo] = rec.month.split("-");
-    const monthName = new Date(parseInt(yr), parseInt(mo) - 1, 1).toLocaleString("en", { month: "long" });
-    toast.success(`Record saved for ${monthName} ${yr}`, {
+    const monthName = new Date(parseInt(yr), parseInt(mo) - 1, 1).toLocaleString(lang === "uz" ? "uz-UZ" : "en", { month: "long" });
+    toast.success(t("data.toast.saved", { month: monthName, year: yr }) as string, {
       style: { borderLeft: "3px solid #4ade80" },
     });
     setForm({ month: "", gridConsumedKwh: "", peakDemandKw: "", billUzs: "", solarGeneratedKwh: "", schoolDays: "", notes: "" });
@@ -151,45 +153,45 @@ function ManualForm({ onAdd }: { onAdd: (r: MonthlyRecord) => void }) {
   return (
     <form onSubmit={submit} style={cardStyle}>
       <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 16 }}>
-        MANUAL ENTRY
+        {t("data.manualEntry")}
       </div>
 
       <div style={fieldWrapper}>
-        <label style={labelStyle}>Reporting month</label>
+        <label style={labelStyle}>{t("data.field.month")}</label>
         <input type="month" value={form.month} onChange={set("month")} style={inputStyle} />
         {errors.month && <div style={errorStyle}>{errors.month}</div>}
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
         <div style={fieldWrapper}>
-          <label style={labelStyle}>Total grid consumed (kWh)</label>
+          <label style={labelStyle}>{t("data.field.gridConsumed")}</label>
           <input type="number" step="0.1" min="0" max="99999" value={form.gridConsumedKwh} onChange={set("gridConsumedKwh")} style={inputStyle} />
           {errors.gridConsumedKwh && <div style={errorStyle}>{errors.gridConsumedKwh}</div>}
         </div>
         <div style={fieldWrapper}>
-          <label style={labelStyle}>Peak demand (kW)</label>
+          <label style={labelStyle}>{t("data.field.peak")}</label>
           <input type="number" step="0.1" min="0" max="999" value={form.peakDemandKw} onChange={set("peakDemandKw")} style={inputStyle} />
           {errors.peakDemandKw && <div style={errorStyle}>{errors.peakDemandKw}</div>}
         </div>
         <div style={fieldWrapper}>
-          <label style={labelStyle}>Electricity bill (UZS)</label>
+          <label style={labelStyle}>{t("data.field.bill")}</label>
           <input type="number" min="0" value={form.billUzs} onChange={set("billUzs")} style={inputStyle} />
           {errors.billUzs && <div style={errorStyle}>{errors.billUzs}</div>}
         </div>
         <div style={fieldWrapper}>
-          <label style={labelStyle}>Solar generated (kWh)</label>
+          <label style={labelStyle}>{t("data.field.solar")}</label>
           <input type="number" step="0.1" min="0" max="99999" value={form.solarGeneratedKwh} onChange={set("solarGeneratedKwh")} style={inputStyle} />
           {errors.solarGeneratedKwh && <div style={errorStyle}>{errors.solarGeneratedKwh}</div>}
         </div>
         <div style={fieldWrapper}>
-          <label style={labelStyle}>Number of school days</label>
+          <label style={labelStyle}>{t("data.field.schoolDays")}</label>
           <input type="number" min="1" max="31" value={form.schoolDays} onChange={set("schoolDays")} style={inputStyle} />
           {errors.schoolDays && <div style={errorStyle}>{errors.schoolDays}</div>}
         </div>
       </div>
 
       <div style={fieldWrapper}>
-        <label style={labelStyle}>Notes</label>
+        <label style={labelStyle}>{t("data.field.notes")}</label>
         <textarea rows={3} maxLength={300} value={form.notes} onChange={set("notes")} style={{ ...inputStyle, resize: "vertical" }} />
         {errors.notes && <div style={errorStyle}>{errors.notes}</div>}
       </div>
@@ -210,13 +212,14 @@ function ManualForm({ onAdd }: { onAdd: (r: MonthlyRecord) => void }) {
           marginTop: 4,
         }}
       >
-        Save monthly record
+        {t("data.btn.save")}
       </button>
     </form>
   );
 }
 
 function CsvUpload({ onImport }: { onImport: (records: MonthlyRecord[]) => void }) {
+  const { t } = useLanguage();
   const [parsed, setParsed] = useState<MonthlyRecord[] | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -227,7 +230,7 @@ function CsvUpload({ onImport }: { onImport: (records: MonthlyRecord[]) => void 
       const text = String(reader.result || "");
       const records = parseCsv(text);
       if (!records.length) {
-        toast.error("No valid rows found in CSV");
+        toast.error(t("data.toast.csvEmpty") as string);
         return;
       }
       setParsed(records);
@@ -238,7 +241,7 @@ function CsvUpload({ onImport }: { onImport: (records: MonthlyRecord[]) => void 
   return (
     <div style={{ marginTop: 16 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-secondary)" }}>BULK CSV UPLOAD</div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-secondary)" }}>{t("data.bulkUpload")}</div>
         <button
           type="button"
           onClick={downloadTemplate}
@@ -253,7 +256,7 @@ function CsvUpload({ onImport }: { onImport: (records: MonthlyRecord[]) => void 
             fontFamily: "inherit",
           }}
         >
-          ↓ Download CSV template
+          {t("data.btn.downloadTemplate")}
         </button>
       </div>
 
@@ -277,7 +280,7 @@ function CsvUpload({ onImport }: { onImport: (records: MonthlyRecord[]) => void 
           }}
         >
           <div style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 12 }}>
-            Drag & drop a .csv file here
+            {t("data.dropzone")}
           </div>
           <input
             ref={inputRef}
@@ -301,7 +304,7 @@ function CsvUpload({ onImport }: { onImport: (records: MonthlyRecord[]) => void 
               fontFamily: "inherit",
             }}
           >
-            Browse files
+            {t("data.btn.browse")}
           </button>
         </div>
       ) : (
@@ -310,12 +313,12 @@ function CsvUpload({ onImport }: { onImport: (records: MonthlyRecord[]) => void 
             <table style={{ width: "100%", fontSize: 12, borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ color: "var(--text-meta)", textAlign: "left" }}>
-                  <th style={{ padding: "6px 8px" }}>Month</th>
-                  <th style={{ padding: "6px 8px" }}>Grid</th>
-                  <th style={{ padding: "6px 8px" }}>Peak</th>
-                  <th style={{ padding: "6px 8px" }}>Bill</th>
-                  <th style={{ padding: "6px 8px" }}>Solar</th>
-                  <th style={{ padding: "6px 8px" }}>Days</th>
+                  <th style={{ padding: "6px 8px" }}>{t("data.col.month")}</th>
+                  <th style={{ padding: "6px 8px" }}>{t("data.col.grid")}</th>
+                  <th style={{ padding: "6px 8px" }}>{t("data.col.peak")}</th>
+                  <th style={{ padding: "6px 8px" }}>{t("data.col.bill")}</th>
+                  <th style={{ padding: "6px 8px" }}>{t("data.col.solar")}</th>
+                  <th style={{ padding: "6px 8px" }}>{t("data.col.days")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -335,13 +338,13 @@ function CsvUpload({ onImport }: { onImport: (records: MonthlyRecord[]) => void 
           <div style={{ display: "flex", gap: 8 }}>
             <button
               type="button"
-              onClick={() => { onImport(parsed); setParsed(null); toast.success(`Imported ${parsed.length} records`); }}
+              onClick={() => { onImport(parsed); setParsed(null); toast.success(t("data.toast.imported", { n: parsed.length }) as string); }}
               style={{
                 background: "var(--accent)", color: "var(--accent-text)", border: "none",
                 borderRadius: 8, padding: "8px 14px", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
               }}
             >
-              Confirm and import {parsed.length} records
+              {t("data.btn.confirmImport", { n: parsed.length })}
             </button>
             <button
               type="button"
@@ -351,7 +354,7 @@ function CsvUpload({ onImport }: { onImport: (records: MonthlyRecord[]) => void 
                 borderRadius: 8, padding: "8px 14px", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
               }}
             >
-              Cancel
+              {t("data.btn.cancel")}
             </button>
           </div>
         </div>
@@ -361,26 +364,27 @@ function CsvUpload({ onImport }: { onImport: (records: MonthlyRecord[]) => void 
 }
 
 function RecordsTable({ records, onDelete }: { records: MonthlyRecord[]; onDelete: (idx: number) => void }) {
+  const { t } = useLanguage();
   return (
     <div style={cardStyle}>
       <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 16 }}>
-        SUBMITTED RECORDS ({records.length})
+        {t("data.records", { n: records.length })}
       </div>
       {records.length === 0 ? (
         <div style={{ textAlign: "center", padding: "40px 20px", fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.6 }}>
-          No records submitted yet.<br />
-          Add your first monthly energy reading using the form.
+          {t("data.empty.line1")}<br />
+          {t("data.empty.line2")}
         </div>
       ) : (
         <div style={{ maxHeight: 600, overflow: "auto" }}>
           <table style={{ width: "100%", fontSize: 12, borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ color: "var(--text-meta)", textAlign: "left", borderBottom: "1px solid var(--border)" }}>
-                <th style={{ padding: "8px 6px", fontWeight: 600 }}>Month</th>
-                <th style={{ padding: "8px 6px", fontWeight: 600 }}>Grid</th>
-                <th style={{ padding: "8px 6px", fontWeight: 600 }}>Solar</th>
-                <th style={{ padding: "8px 6px", fontWeight: 600 }}>Bill</th>
-                <th style={{ padding: "8px 6px", fontWeight: 600 }}>Days</th>
+                <th style={{ padding: "8px 6px", fontWeight: 600 }}>{t("data.col.month")}</th>
+                <th style={{ padding: "8px 6px", fontWeight: 600 }}>{t("data.col.grid")}</th>
+                <th style={{ padding: "8px 6px", fontWeight: 600 }}>{t("data.col.solar")}</th>
+                <th style={{ padding: "8px 6px", fontWeight: 600 }}>{t("data.col.bill")}</th>
+                <th style={{ padding: "8px 6px", fontWeight: 600 }}>{t("data.col.days")}</th>
                 <th style={{ padding: "8px 6px", fontWeight: 600, width: 32 }}></th>
               </tr>
             </thead>
@@ -421,6 +425,7 @@ function RecordsTable({ records, onDelete }: { records: MonthlyRecord[]; onDelet
 }
 
 export default function DataInput() {
+  const { t } = useLanguage();
   const [records, setRecords] = useState<MonthlyRecord[]>([]);
 
   const sorted = useMemo(() => [...records].sort((a, b) => b.month.localeCompare(a.month)), [records]);
@@ -429,7 +434,7 @@ export default function DataInput() {
     <div style={{ display: "flex", minHeight: "100vh", background: "var(--bg-app)" }}>
       <Sidebar />
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
-        <Topbar title="Data Input" />
+        <Topbar title={t("topbar.title.dataInput") as string} />
         <main style={{ padding: 24, display: "grid", gridTemplateColumns: "3fr 2fr", gap: 16 }}>
           <div>
             <ManualForm onAdd={(r) => setRecords((rs) => [...rs, r])} />

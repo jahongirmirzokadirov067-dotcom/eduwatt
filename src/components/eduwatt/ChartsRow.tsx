@@ -1,5 +1,6 @@
 import { useSolarData } from "@/hooks/useSolarData";
 import { mockData } from "@/data/mockData.js";
+import { useLanguage } from "@/context/LanguageContext";
 
 function lerpColorCSS(t: number, base: string, peak: string) {
   // Use CSS color-mix for theme-aware interpolation
@@ -30,14 +31,15 @@ const subStyle: React.CSSProperties = {
 
 function SolarChart() {
   const { data, loading, error, isLive } = useSolarData();
+  const { t } = useLanguage();
   const max = Math.max(...data.map((d) => d.kwh), 0.001);
 
   return (
     <div style={cardStyle}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
         <div>
-          <div style={headingStyle}>HOURLY SOLAR OUTPUT</div>
-          <div style={subStyle}>kWh · today 07:00–17:00</div>
+          <div style={headingStyle}>{t("chart.hourlySolar")}</div>
+          <div style={subStyle}>{t("chart.hourlySolarSub")}</div>
         </div>
         <span
           style={{
@@ -52,7 +54,7 @@ function SolarChart() {
             whiteSpace: "nowrap",
           }}
         >
-          {isLive ? "● LIVE · OPEN-METEO API" : "ESTIMATED · CACHED"}
+          {isLive ? t("chart.live") : t("chart.estimated")}
         </span>
       </div>
 
@@ -68,7 +70,7 @@ function SolarChart() {
             background: "color-mix(in srgb, var(--crit-color) 8%, transparent)",
           }}
         >
-          Live solar data unavailable — showing estimated values
+          {t("chart.solarUnavailable")}
         </div>
       )}
 
@@ -114,19 +116,27 @@ function SolarChart() {
 
 function ZonesChart() {
   const zones = mockData.zones;
+  const { t } = useLanguage();
+  const zoneKey: Record<string, string> = {
+    "Classrooms": "zone.classrooms",
+    "Science lab": "zone.scienceLab",
+    "Canteen": "zone.canteen",
+    "Hallways": "zone.hallways",
+    "Admin": "zone.admin",
+  };
   const max = Math.max(...zones.map((z) => z.kw));
   const colorFor = (type: string) =>
     type === "thermal" ? "var(--warn-color)" : type === "waste" ? "var(--crit-color)" : "var(--grid-color)";
 
   return (
     <div style={cardStyle}>
-      <div style={headingStyle}>CONSUMPTION BY ZONE</div>
-      <div style={subStyle}>kW · live</div>
+      <div style={headingStyle}>{t("chart.zone")}</div>
+      <div style={subStyle}>{t("chart.zoneSub")}</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         {zones.map((z) => (
           <div key={z.name}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-              <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>{z.name}</span>
+              <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>{t(zoneKey[z.name] || z.name)}</span>
               <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-primary)", letterSpacing: "-0.5px" }}>{z.kw} kW</span>
             </div>
             <div style={{ height: 8, background: "var(--bg-elevated)", borderRadius: 2, overflow: "hidden" }}>
