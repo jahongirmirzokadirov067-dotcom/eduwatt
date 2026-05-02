@@ -38,6 +38,7 @@ const App = () => (
       </TooltipProvider>
     </QueryClientProvider>
   </ThemeProvider>
+  </LanguageProvider>
 );
 
 export default App;
