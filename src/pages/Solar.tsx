@@ -1,6 +1,7 @@
 import Shell from "@/components/eduwatt/Shell";
 import { useSolarData } from "@/hooks/useSolarData";
 import { mockData } from "@/data/mockData.js";
+import { useLanguage } from "@/context/LanguageContext";
 
 const cardStyle: React.CSSProperties = {
   background: "var(--bg-surface)",
