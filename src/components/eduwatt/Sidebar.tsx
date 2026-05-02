@@ -8,6 +8,7 @@ const items = [
   { label: "Alerts", to: "/alerts" },
   { label: "Reports", to: "/reports" },
   { label: "Data input", to: "/data-input", icon: "▤" },
+  { label: "National impact", to: "/impact", icon: "◯" },
   { label: "Settings", to: "/" },
 ];
 
