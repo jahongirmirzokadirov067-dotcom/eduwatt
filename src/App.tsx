@@ -10,6 +10,7 @@ import Solar from "./pages/Solar.tsx";
 import GridPage from "./pages/Grid.tsx";
 import Alerts from "./pages/Alerts.tsx";
 import Reports from "./pages/Reports.tsx";
+import Impact from "./pages/Impact.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/alerts" element={<Alerts />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/data-input" element={<DataInput />} />
+            <Route path="/impact" element={<Impact />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
