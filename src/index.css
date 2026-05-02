@@ -2,39 +2,116 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    --background: 0 0% 6%;
-    --foreground: 44 22% 92%;
-    --card: 0 0% 8%;
-    --card-foreground: 44 22% 92%;
-    --popover: 0 0% 8%;
-    --popover-foreground: 44 22% 92%;
-    --primary: 73 100% 50%;
-    --primary-foreground: 0 0% 6%;
-    --secondary: 0 0% 10%;
-    --secondary-foreground: 44 22% 92%;
-    --muted: 0 0% 12%;
-    --muted-foreground: 0 0% 53%;
-    --accent: 0 0% 10%;
-    --accent-foreground: 44 22% 92%;
-    --destructive: 0 75% 59%;
-    --destructive-foreground: 44 22% 92%;
-    --border: 0 0% 12%;
-    --input: 0 0% 12%;
-    --ring: 73 100% 50%;
-    --radius: 12px;
-  }
+/* ============================================
+   EduWatt Design Tokens
+   Dark mode (default) + Light mode
+   Original dark palette preserved exactly.
+   ============================================ */
+
+:root,
+:root[data-theme="dark"] {
+  /* EduWatt raw tokens (dark) */
+  --bg-app: #0f0f0f;
+  --bg-surface: #141414;
+  --bg-elevated: #1a1a1a;
+  --bg-rec: #0d1a0d;
+  --border: #1e1e1e;
+  --border-soft: #1a1a1a;
+  --border-rec: #1a2e1a;
+  --text-primary: #f0ede6;
+  --text-secondary: #c8c4bc;
+  --text-muted: #888;
+  --text-meta: #666;
+  --text-faint: #444;
+  --text-label: #555;
+  --accent: #C8FF00;
+  --accent-text: #0f0f0f;
+  --accent-soft-bg: #1e2e10;
+  --grid-color: #378ADD;
+  --co2-color: #4ade80;
+  --warn-color: #FF8C42;
+  --crit-color: #E24B4A;
+  --rec-icon-bg: #142014;
+  --rec-icon-border: #1e3a1e;
+  --rec-icon-text: #4a8a4a;
+  --rec-text: #9cb89c;
+
+  /* shadcn tokens */
+  --background: 0 0% 6%;
+  --foreground: 44 22% 92%;
+  --card: 0 0% 8%;
+  --card-foreground: 44 22% 92%;
+  --popover: 0 0% 8%;
+  --popover-foreground: 44 22% 92%;
+  --primary: 73 100% 50%;
+  --primary-foreground: 0 0% 6%;
+  --secondary: 0 0% 10%;
+  --secondary-foreground: 44 22% 92%;
+  --muted: 0 0% 12%;
+  --muted-foreground: 0 0% 53%;
+  --accent-bg: 0 0% 10%;
+  --accent-foreground: 44 22% 92%;
+  --destructive: 0 75% 59%;
+  --destructive-foreground: 44 22% 92%;
+  --border-hsl: 0 0% 12%;
+  --input: 0 0% 12%;
+  --ring: 73 100% 50%;
+  --radius: 12px;
+}
+
+:root[data-theme="light"] {
+  --bg-app: #f7f7f5;
+  --bg-surface: #ffffff;
+  --bg-elevated: #f0efeb;
+  --bg-rec: #f1f7ee;
+  --border: #e3e1dc;
+  --border-soft: #ebe9e3;
+  --border-rec: #d4e3cb;
+  --text-primary: #14140f;
+  --text-secondary: #2a2a24;
+  --text-muted: #5e5b54;
+  --text-meta: #7a7770;
+  --text-faint: #a39f96;
+  --text-label: #7a7770;
+  --accent: #6f9100;
+  --accent-text: #ffffff;
+  --accent-soft-bg: #e6efc8;
+  --grid-color: #2563eb;
+  --co2-color: #16a34a;
+  --warn-color: #ea580c;
+  --crit-color: #c2293c;
+  --rec-icon-bg: #e7f0df;
+  --rec-icon-border: #c7d9b6;
+  --rec-icon-text: #4a7a2f;
+  --rec-text: #355028;
+
+  --background: 60 9% 97%;
+  --foreground: 60 6% 8%;
+  --card: 0 0% 100%;
+  --card-foreground: 60 6% 8%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 60 6% 8%;
+  --primary: 73 100% 28%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 60 5% 94%;
+  --secondary-foreground: 60 6% 8%;
+  --muted: 60 5% 92%;
+  --muted-foreground: 40 5% 36%;
+  --accent-bg: 60 5% 94%;
+  --accent-foreground: 60 6% 8%;
+  --destructive: 0 65% 47%;
+  --destructive-foreground: 0 0% 100%;
+  --border-hsl: 40 8% 87%;
+  --input: 40 8% 87%;
+  --ring: 73 100% 28%;
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
+  * { border-color: hsl(var(--border-hsl)); }
   html, body, #root {
     height: 100%;
-    background-color: #0f0f0f;
-    color: #f0ede6;
+    background-color: var(--bg-app);
+    color: var(--text-primary);
     font-family: 'Inter', system-ui, sans-serif;
     font-weight: 400;
     -webkit-font-smoothing: antialiased;
@@ -45,6 +122,22 @@
   0%, 100% { opacity: 1; }
   50% { opacity: 0.35; }
 }
-.live-dot {
-  animation: eduwatt-pulse 1.6s ease-in-out infinite;
+.live-dot { animation: eduwatt-pulse 1.6s ease-in-out infinite; }
+
+@keyframes eduwatt-shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.eduwatt-skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-elevated);
+  border-radius: 4px;
+}
+.eduwatt-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--text-primary) 8%, transparent), transparent);
+  animation: eduwatt-shimmer 1.4s infinite;
 }

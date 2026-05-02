@@ -1,22 +1,25 @@
+import { NavLink, useLocation } from "react-router-dom";
+
 const items = [
-  "Overview",
-  "Solar",
-  "Grid",
-  "Zones",
-  "Alerts",
-  "Reports",
-  "Settings",
+  { label: "Overview", to: "/" },
+  { label: "Solar", to: "/" },
+  { label: "Grid", to: "/" },
+  { label: "Zones", to: "/" },
+  { label: "Alerts", to: "/" },
+  { label: "Reports", to: "/" },
+  { label: "Data input", to: "/data-input", icon: "▤" },
+  { label: "Settings", to: "/" },
 ];
 
 export default function Sidebar() {
-  const active = "Overview";
+  const { pathname } = useLocation();
   return (
     <aside
       style={{
         width: 200,
         flexShrink: 0,
-        borderRight: "1px solid #1a1a1a",
-        background: "#0f0f0f",
+        borderRight: "1px solid var(--border-soft)",
+        background: "var(--bg-app)",
         height: "100vh",
         position: "sticky",
         top: 0,
@@ -30,35 +33,41 @@ export default function Sidebar() {
           display: "flex",
           alignItems: "center",
           padding: "0 20px",
-          borderBottom: "1px solid #1e1e1e",
+          borderBottom: "1px solid var(--border)",
           fontSize: 13,
           fontWeight: 600,
-          color: "#c8c4bc",
+          color: "var(--text-secondary)",
           letterSpacing: "-0.3px",
         }}
       >
-        <span style={{ color: "#C8FF00", marginRight: 8 }}>◆</span>
+        <span style={{ color: "var(--accent)", marginRight: 8 }}>◆</span>
         EduWatt
       </div>
       <nav style={{ paddingTop: 12, display: "flex", flexDirection: "column" }}>
-        {items.map((item) => {
-          const isActive = item === active;
+        {items.map((item, i) => {
+          const isActive =
+            (item.to === "/" && pathname === "/" && item.label === "Overview") ||
+            (item.to !== "/" && pathname === item.to);
           return (
-            <a
-              key={item}
-              href="#"
+            <NavLink
+              key={`${item.label}-${i}`}
+              to={item.to}
               style={{
                 fontSize: 13,
                 fontWeight: isActive ? 600 : 400,
-                color: isActive ? "#f0ede6" : "#666",
+                color: isActive ? "var(--text-primary)" : "var(--text-meta)",
                 padding: "10px 20px",
                 textDecoration: "none",
-                background: isActive ? "#161616" : "transparent",
-                borderRight: isActive ? "2px solid #C8FF00" : "2px solid transparent",
+                background: isActive ? "var(--bg-elevated)" : "transparent",
+                borderRight: isActive ? "2px solid var(--accent)" : "2px solid transparent",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
               }}
             >
-              {item}
-            </a>
+              {item.icon && <span style={{ fontSize: 11, opacity: 0.7 }}>{item.icon}</span>}
+              {item.label}
+            </NavLink>
           );
         })}
       </nav>

@@ -6,7 +6,7 @@ import BottomRow from "@/components/eduwatt/BottomRow";
 
 const Index = () => {
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "#0f0f0f" }}>
+    <div style={{ display: "flex", minHeight: "100vh", background: "var(--bg-app)" }}>
       <Sidebar />
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
         <Topbar />
