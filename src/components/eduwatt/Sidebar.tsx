@@ -1,19 +1,21 @@
 import { NavLink, useLocation } from "react-router-dom";
+import { useLanguage } from "@/context/LanguageContext";
 
 const items = [
-  { label: "Overview", to: "/" },
-  { label: "Solar", to: "/solar" },
-  { label: "Grid", to: "/grid" },
-  { label: "Zones", to: "/" },
-  { label: "Alerts", to: "/alerts" },
-  { label: "Reports", to: "/reports" },
-  { label: "Data input", to: "/data-input", icon: "▤" },
-  { label: "National impact", to: "/impact", icon: "◯" },
-  { label: "Settings", to: "/" },
+  { key: "nav.overview", to: "/" },
+  { key: "nav.solar", to: "/solar" },
+  { key: "nav.grid", to: "/grid" },
+  { key: "nav.zones", to: "/" },
+  { key: "nav.alerts", to: "/alerts" },
+  { key: "nav.reports", to: "/reports" },
+  { key: "nav.dataInput", to: "/data-input", icon: "▤" },
+  { key: "nav.impact", to: "/impact", icon: "◯" },
+  { key: "nav.settings", to: "/" },
 ];
 
 export default function Sidebar() {
   const { pathname } = useLocation();
+  const { t } = useLanguage();
   return (
     <aside
       style={{
@@ -47,11 +49,11 @@ export default function Sidebar() {
       <nav style={{ paddingTop: 12, display: "flex", flexDirection: "column" }}>
         {items.map((item, i) => {
           const isActive =
-            (item.to === "/" && pathname === "/" && item.label === "Overview") ||
+            (item.to === "/" && pathname === "/" && item.key === "nav.overview") ||
             (item.to !== "/" && pathname === item.to);
           return (
             <NavLink
-              key={`${item.label}-${i}`}
+              key={`${item.key}-${i}`}
               to={item.to}
               style={{
                 fontSize: 13,
@@ -67,7 +69,7 @@ export default function Sidebar() {
               }}
             >
               {item.icon && <span style={{ fontSize: 11, opacity: 0.7 }}>{item.icon}</span>}
-              {item.label}
+              {t(item.key)}
             </NavLink>
           );
         })}
