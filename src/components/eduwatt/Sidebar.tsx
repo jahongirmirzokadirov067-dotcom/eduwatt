@@ -2,11 +2,11 @@ import { NavLink, useLocation } from "react-router-dom";
 
 const items = [
   { label: "Overview", to: "/" },
-  { label: "Solar", to: "/" },
-  { label: "Grid", to: "/" },
+  { label: "Solar", to: "/solar" },
+  { label: "Grid", to: "/grid" },
   { label: "Zones", to: "/" },
-  { label: "Alerts", to: "/" },
-  { label: "Reports", to: "/" },
+  { label: "Alerts", to: "/alerts" },
+  { label: "Reports", to: "/reports" },
   { label: "Data input", to: "/data-input", icon: "▤" },
   { label: "Settings", to: "/" },
 ];
