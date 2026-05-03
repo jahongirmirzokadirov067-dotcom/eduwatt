@@ -14,7 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      school_profiles: {
+        Row: {
+          city: string | null
+          created_at: string | null
+          floors: number | null
+          id: string
+          operating_hours: string | null
+          panel_area_m2: number | null
+          school_name: string | null
+          school_type: string | null
+          solar_capacity_kw: number | null
+          tariff_uzs_per_kwh: number | null
+          total_rooms: number | null
+          user_id: string | null
+        }
+        Insert: {
+          city?: string | null
+          created_at?: string | null
+          floors?: number | null
+          id?: string
+          operating_hours?: string | null
+          panel_area_m2?: number | null
+          school_name?: string | null
+          school_type?: string | null
+          solar_capacity_kw?: number | null
+          tariff_uzs_per_kwh?: number | null
+          total_rooms?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          city?: string | null
+          created_at?: string | null
+          floors?: number | null
+          id?: string
+          operating_hours?: string | null
+          panel_area_m2?: number | null
+          school_name?: string | null
+          school_type?: string | null
+          solar_capacity_kw?: number | null
+          tariff_uzs_per_kwh?: number | null
+          total_rooms?: number | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
