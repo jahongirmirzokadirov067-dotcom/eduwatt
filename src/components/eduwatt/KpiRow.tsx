@@ -1,5 +1,6 @@
 import { mockData } from "@/data/mockData.js";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSchoolData } from "@/hooks/useSchoolData";
 
 const cardStyle: React.CSSProperties = {
   background: "var(--bg-surface)",
@@ -62,11 +63,20 @@ function Card({
 export default function KpiRow() {
   const k = mockData.kpis;
   const { t } = useLanguage();
+  const { kpis } = useSchoolData();
+
+  const solarVal = kpis ? Number(kpis.solarGeneratedKwh.toFixed(1)) : k.solarGenerated.value;
+  const gridVal = kpis ? Number(kpis.gridConsumedKwh.toFixed(1)) : k.gridConsumed.value;
+  const co2Val = kpis ? Number(kpis.co2AvoidedKg.toFixed(1)) : k.co2Avoided.value;
+  const savingDelta = kpis
+    ? `≈ ${Math.round(kpis.estimatedDailySavingUzs).toLocaleString()} UZS saved`
+    : (t("kpi.delta.vsYesterdayPos", { p: "8.2" }) as string);
+
   return (
     <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
-      <Card accent="var(--accent)" label={t("kpi.solarGenerated") as string} value={k.solarGenerated.value} unit={k.solarGenerated.unit} delta={t("kpi.delta.vsYesterdayPos", { p: "8.2" }) as string} deltaPositive={k.solarGenerated.deltaPositive} />
-      <Card accent="var(--grid-color)" label={t("kpi.gridConsumed") as string} value={k.gridConsumed.value} unit={k.gridConsumed.unit} delta={t("kpi.delta.vsYesterdayNeg", { p: "4.1" }) as string} deltaPositive={k.gridConsumed.deltaPositive} />
-      <Card accent="var(--co2-color)" label={t("kpi.co2Avoided") as string} value={k.co2Avoided.value} unit={k.co2Avoided.unit} delta={t("kpi.delta.vsYesterdayPos", { p: "8.2" }) as string} deltaPositive={k.co2Avoided.deltaPositive} />
+      <Card accent="var(--accent)" label={t("kpi.solarGenerated") as string} value={solarVal} unit={k.solarGenerated.unit} delta={savingDelta} deltaPositive={true} />
+      <Card accent="var(--grid-color)" label={t("kpi.gridConsumed") as string} value={gridVal} unit={k.gridConsumed.unit} delta={t("kpi.delta.vsYesterdayNeg", { p: "4.1" }) as string} deltaPositive={k.gridConsumed.deltaPositive} />
+      <Card accent="var(--co2-color)" label={t("kpi.co2Avoided") as string} value={co2Val} unit={k.co2Avoided.unit} delta={t("kpi.delta.vsYesterdayPos", { p: "8.2" }) as string} deltaPositive={k.co2Avoided.deltaPositive} />
       <Card accent="var(--warn-color)" label={t("kpi.wasteAlerts") as string} value={k.wasteAlerts.value} unit={t("kpi.unit.active") as string} delta={t("kpi.delta.unresolved", { n: 2 }) as string} deltaPositive={k.wasteAlerts.deltaPositive} />
     </div>
   );

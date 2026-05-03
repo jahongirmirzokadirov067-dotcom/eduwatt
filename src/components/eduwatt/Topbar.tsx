@@ -1,10 +1,15 @@
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSchoolData } from "@/hooks/useSchoolData";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Topbar({ title }: { title?: string }) {
   const { theme, toggle } = useTheme();
   const { lang, setLang, t } = useLanguage();
+  const { profile } = useSchoolData();
+  const { signOut } = useAuth();
   const displayTitle = title || (t("topbar.title.overview") as string);
+  const schoolName = profile?.school_name || "Greenfield Secondary School";
   return (
     <header
       style={{
