@@ -98,6 +98,24 @@ export default function Topbar({ title }: { title?: string }) {
         >
           {theme === "dark" ? (t("topbar.theme.dark") as string) : (t("topbar.theme.light") as string)}
         </button>
+        <button
+          type="button"
+          onClick={() => signOut()}
+          aria-label="Sign out"
+          style={{
+            background: "var(--bg-surface)",
+            border: "1px solid var(--border)",
+            borderRadius: 12,
+            padding: "5px 10px",
+            fontSize: 11,
+            fontWeight: 600,
+            color: "var(--text-secondary)",
+            cursor: "pointer",
+            fontFamily: "inherit",
+            letterSpacing: "0.3px",
+          }}
+        >
+          Sign out
       </div>
     </header>
   );
