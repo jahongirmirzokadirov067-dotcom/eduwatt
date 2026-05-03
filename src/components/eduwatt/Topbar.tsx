@@ -45,7 +45,7 @@ export default function Topbar({ title }: { title?: string }) {
             padding: "5px 12px",
           }}
         >
-          Greenfield Secondary School
+          {schoolName}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <span
