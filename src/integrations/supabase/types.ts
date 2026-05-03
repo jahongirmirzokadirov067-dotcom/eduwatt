@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      monthly_records: {
+        Row: {
+          bill_uzs: number | null
+          created_at: string
+          grid_consumed_kwh: number | null
+          id: string
+          month: string
+          school_days: number | null
+          solar_generated_kwh: number | null
+          user_id: string
+        }
+        Insert: {
+          bill_uzs?: number | null
+          created_at?: string
+          grid_consumed_kwh?: number | null
+          id?: string
+          month: string
+          school_days?: number | null
+          solar_generated_kwh?: number | null
+          user_id: string
+        }
+        Update: {
+          bill_uzs?: number | null
+          created_at?: string
+          grid_consumed_kwh?: number | null
+          id?: string
+          month?: string
+          school_days?: number | null
+          solar_generated_kwh?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       school_profiles: {
         Row: {
           city: string | null
@@ -27,7 +60,7 @@ export type Database = {
           solar_capacity_kw: number | null
           tariff_uzs_per_kwh: number | null
           total_rooms: number | null
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           city?: string | null
@@ -41,7 +74,7 @@ export type Database = {
           solar_capacity_kw?: number | null
           tariff_uzs_per_kwh?: number | null
           total_rooms?: number | null
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           city?: string | null
@@ -55,7 +88,7 @@ export type Database = {
           solar_capacity_kw?: number | null
           tariff_uzs_per_kwh?: number | null
           total_rooms?: number | null
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }
