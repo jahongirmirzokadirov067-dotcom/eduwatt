@@ -116,6 +116,7 @@ export default function Topbar({ title }: { title?: string }) {
           }}
         >
           Sign out
+        </button>
       </div>
     </header>
   );
