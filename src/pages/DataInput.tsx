@@ -1,8 +1,11 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import Sidebar from "@/components/eduwatt/Sidebar";
 import Topbar from "@/components/eduwatt/Topbar";
 import { useLanguage } from "@/context/LanguageContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/context/AuthContext";
+import { notifyRecordsUpdated } from "@/hooks/useSchoolData";
 
 interface MonthlyRecord {
   month: string;
@@ -426,7 +429,51 @@ function RecordsTable({ records, onDelete }: { records: MonthlyRecord[]; onDelet
 
 export default function DataInput() {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const [records, setRecords] = useState<MonthlyRecord[]>([]);
+
+  const fetchRecords = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from("monthly_records")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("month", { ascending: false });
+    if (data) {
+      setRecords(
+        data.map((r) => ({
+          month: String(r.month).slice(0, 7),
+          gridConsumedKwh: Number(r.grid_consumed_kwh ?? 0),
+          peakDemandKw: 0,
+          billUzs: Number(r.bill_uzs ?? 0),
+          solarGeneratedKwh: r.solar_generated_kwh != null ? Number(r.solar_generated_kwh) : null,
+          schoolDays: Number(r.school_days ?? 21),
+          notes: "",
+        })),
+      );
+    }
+  };
+
+  useEffect(() => { fetchRecords(); }, [user]);
+
+  const persist = async (rec: MonthlyRecord) => {
+    if (!user) return;
+    const monthDate = `${rec.month}-01`;
+    const { error } = await supabase.from("monthly_records").insert({
+      user_id: user.id,
+      month: monthDate,
+      grid_consumed_kwh: rec.gridConsumedKwh,
+      solar_generated_kwh: rec.solarGeneratedKwh,
+      bill_uzs: rec.billUzs,
+      school_days: rec.schoolDays,
+    });
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    notifyRecordsUpdated();
+    fetchRecords();
+  };
 
   const sorted = useMemo(() => [...records].sort((a, b) => b.month.localeCompare(a.month)), [records]);
 
@@ -437,8 +484,8 @@ export default function DataInput() {
         <Topbar title={t("topbar.title.dataInput") as string} />
         <main style={{ padding: 24, display: "grid", gridTemplateColumns: "3fr 2fr", gap: 16 }}>
           <div>
-            <ManualForm onAdd={(r) => setRecords((rs) => [...rs, r])} />
-            <CsvUpload onImport={(recs) => setRecords((rs) => [...rs, ...recs])} />
+            <ManualForm onAdd={(r) => { setRecords((rs) => [...rs, r]); persist(r); }} />
+            <CsvUpload onImport={(recs) => { setRecords((rs) => [...rs, ...recs]); recs.forEach(persist); }} />
           </div>
           <RecordsTable records={sorted} onDelete={(idx) => {
             const target = sorted[idx];
