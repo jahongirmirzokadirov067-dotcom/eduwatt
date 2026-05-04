@@ -73,7 +73,7 @@ export function useSchoolData() {
         solarGeneratedKwh: solar ?? 0,
         gridConsumedKwh: grid ?? 0,
         estimatedDailySavingUzs: (solar ?? 0) * Number(tariff),
-        co2AvoidedKg: (solar ?? 0) * 0.5,
+        co2AvoidedKg: (solar ?? 0) * 0.28,
       }
     : null;
 

@@ -4,7 +4,7 @@ export const mockData = {
   kpis: {
     solarGenerated: { value: 142.6, unit: "kWh", delta: "+8.2% vs yesterday", deltaPositive: true },
     gridConsumed: { value: 87.3, unit: "kWh", delta: "-4.1% vs yesterday", deltaPositive: true },
-    co2Avoided: { value: 64.2, unit: "kg", delta: "+8.2% vs yesterday", deltaPositive: true },
+    co2Avoided: { value: 39.9, unit: "kg", delta: "+8.2% vs yesterday", deltaPositive: true },
     wasteAlerts: { value: 3, unit: "active", delta: "2 unresolved >1h", deltaPositive: false },
   },
   hourlySolar: [
@@ -33,13 +33,13 @@ export const mockData = {
     { severity: "warning", zone: "Lab 2", node: "MTR-L-02", message: "Science lab AC overcooling — setpoint 19°C with windows open", recommendation: "Raise setpoint to 23°C and close windows during cooling.", wasteKwhPerDay: 1.6, wasteUzsPerDay: 1120, timestamp: "1 hr ago · Lab 2", waste: "Est. waste: 1.6 kWh", action: "Adjust setpoint", resolved: false },
   ],
   weeklyTrend: [
-    { day: "Mon", solar: 128.4, grid: 92.1, co2: 58.0, isToday: false },
-    { day: "Tue", solar: 134.2, grid: 88.6, co2: 60.4, isToday: false },
-    { day: "Wed", solar: 119.7, grid: 95.3, co2: 53.9, isToday: false },
-    { day: "Thu", solar: 141.0, grid: 86.0, co2: 63.5, isToday: false },
-    { day: "Fri", solar: 137.8, grid: 89.2, co2: 62.0, isToday: false },
-    { day: "Sat", solar: 145.3, grid: 80.5, co2: 65.4, isToday: false },
-    { day: "Sun", solar: 142.6, grid: 87.3, co2: 64.2, isToday: true },
+    { day: "Mon", solar: 128.4, grid: 92.1, co2: 35.9, isToday: false },
+    { day: "Tue", solar: 134.2, grid: 88.6, co2: 37.6, isToday: false },
+    { day: "Wed", solar: 119.7, grid: 95.3, co2: 33.5, isToday: false },
+    { day: "Thu", solar: 141.0, grid: 86.0, co2: 39.5, isToday: false },
+    { day: "Fri", solar: 137.8, grid: 89.2, co2: 38.6, isToday: false },
+    { day: "Sat", solar: 145.3, grid: 80.5, co2: 40.7, isToday: false },
+    { day: "Sun", solar: 142.6, grid: 87.3, co2: 39.9, isToday: true },
   ],
   panelGroups: [
     { name: "Roof A — South", orientation: "South", capacityKw: 8.5, todayKwh: 56.2, efficiency: 18.7 },
