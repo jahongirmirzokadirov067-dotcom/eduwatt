@@ -5,12 +5,12 @@ const items = [
   { key: "nav.overview", to: "/" },
   { key: "nav.solar", to: "/solar" },
   { key: "nav.grid", to: "/grid" },
-  { key: "nav.zones", to: "/" },
+  { key: "nav.zones", to: "/zones" },
   { key: "nav.alerts", to: "/alerts" },
   { key: "nav.reports", to: "/reports" },
   { key: "nav.dataInput", to: "/data-input", icon: "▤" },
   { key: "nav.impact", to: "/impact", icon: "◯" },
-  { key: "nav.settings", to: "/" },
+  { key: "nav.settings", to: "/settings" },
 ];
 
 export default function Sidebar() {

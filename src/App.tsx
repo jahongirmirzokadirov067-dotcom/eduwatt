@@ -14,6 +14,8 @@ import GridPage from "./pages/Grid.tsx";
 import Alerts from "./pages/Alerts.tsx";
 import Reports from "./pages/Reports.tsx";
 import Impact from "./pages/Impact.tsx";
+import Zones from "./pages/Zones.tsx";
+import Settings from "./pages/Settings.tsx";
 import Login from "./pages/Login.tsx";
 import Onboarding from "./pages/Onboarding.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -39,6 +41,8 @@ const App = () => (
                 <Route path="/reports" element={<RequireAuth><Reports /></RequireAuth>} />
                 <Route path="/data-input" element={<RequireAuth><DataInput /></RequireAuth>} />
                 <Route path="/impact" element={<RequireAuth><Impact /></RequireAuth>} />
+                <Route path="/zones" element={<RequireAuth><Zones /></RequireAuth>} />
+                <Route path="/settings" element={<RequireAuth><Settings /></RequireAuth>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </AuthProvider>
