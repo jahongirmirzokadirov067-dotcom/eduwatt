@@ -49,6 +49,7 @@ export type Database = {
       }
       school_profiles: {
         Row: {
+          alert_threshold_kwh: number | null
           city: string | null
           created_at: string | null
           floors: number | null
@@ -63,6 +64,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          alert_threshold_kwh?: number | null
           city?: string | null
           created_at?: string | null
           floors?: number | null
@@ -77,6 +79,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          alert_threshold_kwh?: number | null
           city?: string | null
           created_at?: string | null
           floors?: number | null
@@ -89,6 +92,33 @@ export type Database = {
           tariff_uzs_per_kwh?: number | null
           total_rooms?: number | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      zones: {
+        Row: {
+          created_at: string
+          current_kw: number | null
+          id: string
+          name: string
+          user_id: string
+          zone_type: string
+        }
+        Insert: {
+          created_at?: string
+          current_kw?: number | null
+          id?: string
+          name: string
+          user_id: string
+          zone_type?: string
+        }
+        Update: {
+          created_at?: string
+          current_kw?: number | null
+          id?: string
+          name?: string
+          user_id?: string
+          zone_type?: string
         }
         Relationships: []
       }
