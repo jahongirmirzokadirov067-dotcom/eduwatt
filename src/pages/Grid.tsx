@@ -38,7 +38,7 @@ export default function GridPage() {
   const solarTotal = solar.reduce((s, d) => s + d.kwh, 0);
   const cost = Math.round(grid * mockData.gridTariffUzsPerKwh);
   const offset = ((solarTotal / (solarTotal + grid)) * 100).toFixed(1);
-  const co2Grid = (grid * 0.45).toFixed(1);
+  const co2Grid = (grid * 0.28).toFixed(1);
 
   const hourly = solar.map((d) => ({
     hour: d.hour,
