@@ -132,6 +132,8 @@ export default function Alerts() {
                 {t("alertsPage.estWasteLine", { kwh: a.wasteKwhPerDay, uzs: a.wasteUzsPerDay.toLocaleString() })}
               </div>
               <button
+                onClick={() => !a.resolved && resolveAlert(idx)}
+                disabled={a.resolved}
                 style={{
                   fontSize: 11,
                   fontWeight: 600,
@@ -139,12 +141,13 @@ export default function Alerts() {
                   borderRadius: 8,
                   border: "1px solid var(--border)",
                   background: "var(--bg-elevated)",
-                  color: "var(--accent)",
-                  cursor: "pointer",
+                  color: a.resolved ? "var(--text-meta)" : "var(--accent)",
+                  cursor: a.resolved ? "default" : "pointer",
                   fontFamily: "inherit",
+                  opacity: a.resolved ? 0.7 : 1,
                 }}
               >
-                {action} →
+                {a.resolved ? (t("alertsPage.filter.resolved") as string) : `${action} →`}
               </button>
             </div>
           </div>
