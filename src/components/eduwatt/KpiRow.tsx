@@ -1,6 +1,7 @@
 import { mockData } from "@/data/mockData.js";
 import { useLanguage } from "@/context/LanguageContext";
 import { useSchoolData } from "@/hooks/useSchoolData";
+import { useSolarData } from "@/hooks/useSolarData";
 
 const cardStyle: React.CSSProperties = {
   background: "var(--bg-surface)",
