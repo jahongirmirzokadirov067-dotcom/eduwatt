@@ -34,6 +34,7 @@ function Kpi({ label, value, unit }: { label: string; value: string | number; un
 
 export default function GridPage() {
   const { data: solar } = useSolarData();
+  const { records } = useSchoolData();
   const { t } = useLanguage();
   const grid = mockData.kpis.gridConsumed.value;
   const solarTotal = solar.reduce((s, d) => s + d.kwh, 0);
