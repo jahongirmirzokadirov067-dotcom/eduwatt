@@ -1,5 +1,6 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { useLanguage } from "@/context/LanguageContext";
+import logo from "@/assets/eduwatt-logo.jpg";
 
 const items = [
   { key: "nav.overview", to: "/" },
@@ -43,7 +44,7 @@ export default function Sidebar() {
           letterSpacing: "-0.3px",
         }}
       >
-        <span style={{ color: "var(--accent)", marginRight: 8 }}>◆</span>
+        <img src={logo} alt="EduWatt" style={{ width: 22, height: 22, marginRight: 8, objectFit: "contain" }} />
         EduWatt
       </div>
       <nav style={{ paddingTop: 12, display: "flex", flexDirection: "column" }}>
