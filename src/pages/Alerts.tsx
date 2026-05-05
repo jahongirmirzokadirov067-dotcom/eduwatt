@@ -15,22 +15,33 @@ type Filter = "all" | "active" | "resolved";
 export default function Alerts() {
   const [filter, setFilter] = useState<Filter>("all");
   const [q, setQ] = useState("");
+  const [resolvedIdx, setResolvedIdx] = useState<Set<number>>(new Set());
   const { t } = useLanguage();
 
   const colorFor = (s: string) =>
     s === "critical" ? "var(--crit-color)" : s === "warning" ? "var(--warn-color)" : "var(--co2-color)";
 
-  const filtered = useMemo(() => {
-    return mockData.alerts.map((a: any, i: number) => ({ ...a, _idx: i + 1 })).filter((a: any) => {
-      if (filter === "active" && a.resolved) return false;
-      if (filter === "resolved" && !a.resolved) return false;
-      if (q) {
-        const term = q.toLowerCase();
-        if (!a.zone.toLowerCase().includes(term) && !a.message.toLowerCase().includes(term)) return false;
-      }
-      return true;
+  const resolveAlert = (idx: number) => {
+    setResolvedIdx((prev) => {
+      const next = new Set(prev);
+      next.add(idx);
+      return next;
     });
-  }, [filter, q]);
+  };
+
+  const filtered = useMemo(() => {
+    return mockData.alerts
+      .map((a: any, i: number) => ({ ...a, _idx: i + 1, resolved: a.resolved || resolvedIdx.has(i + 1) }))
+      .filter((a: any) => {
+        if (filter === "active" && a.resolved) return false;
+        if (filter === "resolved" && !a.resolved) return false;
+        if (q) {
+          const term = q.toLowerCase();
+          if (!a.zone.toLowerCase().includes(term) && !a.message.toLowerCase().includes(term)) return false;
+        }
+        return true;
+      });
+  }, [filter, q, resolvedIdx]);
 
   const pill = (key: Filter, label: string) => (
     <button
