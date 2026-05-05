@@ -19,6 +19,13 @@ const subStyle: React.CSSProperties = {
 
 function AlertsPanel() {
   const { t } = useLanguage();
+  const [resolvedIdx, setResolvedIdx] = useState<Set<number>>(new Set());
+  const resolve = (idx: number) =>
+    setResolvedIdx((prev) => {
+      const next = new Set(prev);
+      next.add(idx);
+      return next;
+    });
   const colorFor = (s: string) =>
     s === "critical" ? "var(--crit-color)" : s === "warning" ? "var(--warn-color)" : "var(--co2-color)";
   return (
@@ -31,10 +38,11 @@ function AlertsPanel() {
       }}
     >
       <div style={headingStyle}>{t("alerts.activeTitle")}</div>
-      <div style={subStyle}>{t("alerts.unresolvedCount", { n: 3 })}</div>
+      <div style={subStyle}>{t("alerts.unresolvedCount", { n: Math.max(0, mockData.alerts.length - resolvedIdx.size) })}</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
         {mockData.alerts.map((a, i) => {
           const idx = i + 1;
+          if (resolvedIdx.has(idx)) return null;
           const message = t(`alert.${idx}.message`) as string;
           const timestamp = t(`alert.${idx}.timestamp`) as string;
           const action = t(`alert.${idx}.action`) as string;
@@ -47,9 +55,13 @@ function AlertsPanel() {
                   <span style={{ fontSize: 10, color: "var(--text-faint)" }}>
                     {timestamp} · {t("alerts.estWaste")}: {a.wasteKwhPerDay} kWh
                   </span>
-                  <a href="#" style={{ fontSize: 12, color: "var(--accent)", textDecoration: "none", fontWeight: 600 }}>
+                  <button
+                    type="button"
+                    onClick={() => resolve(idx)}
+                    style={{ fontSize: 12, color: "var(--accent)", textDecoration: "none", fontWeight: 600, background: "none", border: "none", padding: 0, cursor: "pointer", fontFamily: "inherit" }}
+                  >
                     {action} →
-                  </a>
+                  </button>
                 </div>
               </div>
             </div>
