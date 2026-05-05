@@ -77,5 +77,5 @@ export function useSchoolData() {
       }
     : null;
 
-  return { profile, latest, kpis, loading, refetch };
+  return { profile, latest, records, kpis, loading, refetch };
 }
