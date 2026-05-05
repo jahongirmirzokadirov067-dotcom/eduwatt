@@ -1,6 +1,7 @@
 import Shell from "@/components/eduwatt/Shell";
 import { mockData } from "@/data/mockData.js";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSchoolData } from "@/hooks/useSchoolData";
 
 const cardStyle: React.CSSProperties = {
   background: "var(--bg-surface)",
@@ -32,14 +33,28 @@ function Kpi({ label, value, unit }: { label: string; value: string | number; un
 
 export default function Reports() {
   const { t, lang } = useLanguage();
+  const { records, profile } = useSchoolData();
   const week = mockData.weeklyTrend;
-  const weekSolar = week.reduce((s: number, d: any) => s + d.solar, 0);
-  const weekGrid = week.reduce((s: number, d: any) => s + d.grid, 0);
-  const weekCo2 = week.reduce((s: number, d: any) => s + d.co2, 0);
-  const monthSolar = (weekSolar / 7 * 30).toFixed(0);
-  const monthGrid = (weekGrid / 7 * 30).toFixed(0);
-  const monthCo2 = (weekCo2 / 7 * 30).toFixed(0);
-  const monthSavedUzs = Math.round(parseFloat(monthSolar) * mockData.gridTariffUzsPerKwh).toLocaleString();
+  const tariff = Number(profile?.tariff_uzs_per_kwh ?? mockData.gridTariffUzsPerKwh);
+
+  let monthSolar: string, monthGrid: string, monthCo2: string, monthSavedUzs: string;
+  if (records.length) {
+    const totSolar = records.reduce((s, r) => s + Number(r.solar_generated_kwh ?? 0), 0);
+    const totGrid = records.reduce((s, r) => s + Number(r.grid_consumed_kwh ?? 0), 0);
+    const totCo2 = totSolar * 0.5;
+    monthSolar = totSolar.toFixed(0);
+    monthGrid = totGrid.toFixed(0);
+    monthCo2 = totCo2.toFixed(0);
+    monthSavedUzs = Math.round(totSolar * tariff).toLocaleString();
+  } else {
+    const weekSolar = week.reduce((s: number, d: any) => s + d.solar, 0);
+    const weekGrid = week.reduce((s: number, d: any) => s + d.grid, 0);
+    const weekCo2 = week.reduce((s: number, d: any) => s + d.co2, 0);
+    monthSolar = (weekSolar / 7 * 30).toFixed(0);
+    monthGrid = (weekGrid / 7 * 30).toFixed(0);
+    monthCo2 = (weekCo2 / 7 * 30).toFixed(0);
+    monthSavedUzs = Math.round(parseFloat(monthSolar) * tariff).toLocaleString();
+  }
   const dateLocale = lang === "uz" ? "uz-UZ" : "en-US";
 
   return (

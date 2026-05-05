@@ -2,6 +2,7 @@ import Shell from "@/components/eduwatt/Shell";
 import { mockData } from "@/data/mockData.js";
 import { useSolarData } from "@/hooks/useSolarData";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSchoolData } from "@/hooks/useSchoolData";
 
 const cardStyle: React.CSSProperties = {
   background: "var(--bg-surface)",
@@ -33,6 +34,7 @@ function Kpi({ label, value, unit }: { label: string; value: string | number; un
 
 export default function GridPage() {
   const { data: solar } = useSolarData();
+  const { records } = useSchoolData();
   const { t } = useLanguage();
   const grid = mockData.kpis.gridConsumed.value;
   const solarTotal = solar.reduce((s, d) => s + d.kwh, 0);
@@ -88,7 +90,14 @@ export default function GridPage() {
             </tr>
           </thead>
           <tbody>
-            {mockData.weeklyTrend.map((d: any) => (
+            {(records.length
+              ? records.slice(-7).map((r) => {
+                  const s = Number(r.solar_generated_kwh ?? 0);
+                  const g = Number(r.grid_consumed_kwh ?? 0);
+                  return { day: String(r.month).slice(0, 7), solar: s, grid: g, co2: Number((s * 0.5).toFixed(1)), isToday: false };
+                })
+              : mockData.weeklyTrend
+            ).map((d: any) => (
               <tr key={d.day} style={{ color: "var(--text-secondary)", background: d.isToday ? "var(--bg-elevated)" : "transparent" }}>
                 <td style={{ padding: "10px 8px", borderBottom: "1px solid var(--border-soft)", fontWeight: d.isToday ? 600 : 400 }}>{d.day}{d.isToday && ` · ${t("grid.today")}`}</td>
                 <td style={{ padding: "10px 8px", borderBottom: "1px solid var(--border-soft)" }}>{d.solar}</td>

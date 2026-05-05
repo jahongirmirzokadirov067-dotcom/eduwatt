@@ -28,31 +28,31 @@ export function notifyRecordsUpdated() {
 export function useSchoolData() {
   const { user } = useAuth();
   const [profile, setProfile] = useState<SchoolProfile | null>(null);
-  const [latest, setLatest] = useState<MonthlyRecordRow | null>(null);
+  const [records, setRecords] = useState<MonthlyRecordRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   const refetch = useCallback(async () => {
     if (!user) {
       setProfile(null);
-      setLatest(null);
+      setRecords([]);
       setLoading(false);
       return;
     }
     setLoading(true);
-    const [{ data: prof }, { data: rec }] = await Promise.all([
+    const [{ data: prof }, { data: recs }] = await Promise.all([
       supabase.from("school_profiles").select("*").eq("user_id", user.id).maybeSingle(),
       supabase
         .from("monthly_records")
         .select("*")
         .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
+        .order("month", { ascending: true }),
     ]);
     setProfile((prof as SchoolProfile) ?? null);
-    setLatest((rec as MonthlyRecordRow) ?? null);
+    setRecords((recs as MonthlyRecordRow[]) ?? []);
     setLoading(false);
   }, [user]);
+
+  const latest = records.length ? records[records.length - 1] : null;
 
   useEffect(() => {
     refetch();
@@ -77,5 +77,5 @@ export function useSchoolData() {
       }
     : null;
 
-  return { profile, latest, kpis, loading, refetch };
+  return { profile, latest, records, kpis, loading, refetch };
 }
