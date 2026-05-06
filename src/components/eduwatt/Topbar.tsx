@@ -9,7 +9,7 @@ export default function Topbar({ title }: { title?: string }) {
   const { profile } = useSchoolData();
   const { signOut } = useAuth();
   const displayTitle = title || (t("topbar.title.overview") as string);
-  const schoolName = profile?.school_name || "Greenfield Secondary School";
+  const schoolName = profile?.school_name || "EduWatt School";
   return (
     <header
       style={{
