@@ -143,8 +143,110 @@
 }
 
 @media print {
+  @page { size: A4; margin: 14mm; }
   .eduwatt-print-hide { display: none !important; }
   .eduwatt-print-only { display: block !important; }
-  body, html, #root { background: #fff !important; color: #000 !important; }
-  .eduwatt-print-card { border: 1px solid #ccc !important; background: #fff !important; color: #000 !important; width: 100% !important; box-shadow: none !important; }
+  html, body, #root {
+    background: #ffffff !important;
+    color: #1a1a1a !important;
+    font-family: 'Inter', system-ui, sans-serif !important;
+  }
+  /* Force light tokens for print regardless of theme */
+  :root, :root[data-theme="dark"], :root[data-theme="light"] {
+    --bg-app: #ffffff !important;
+    --bg-surface: #ffffff !important;
+    --bg-elevated: #f5f7f1 !important;
+    --border: #d9dcd2 !important;
+    --border-soft: #e6e8e0 !important;
+    --text-primary: #14140f !important;
+    --text-secondary: #2a2a24 !important;
+    --text-muted: #5e5b54 !important;
+    --text-meta: #6a6760 !important;
+    --text-faint: #8a8780 !important;
+    --text-label: #6a6760 !important;
+    --accent: #5a8a00 !important;
+    --accent-text: #ffffff !important;
+    --accent-soft-bg: #e7f0d4 !important;
+    --grid-color: #2563eb !important;
+    --co2-color: #2f9e44 !important;
+  }
+  main { padding: 0 !important; gap: 0 !important; }
+  .eduwatt-report-doc {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+  .eduwatt-report-table { page-break-inside: avoid; }
+  .eduwatt-report-kpi { break-inside: avoid; }
 }
+
+/* ===========================
+   Responsive overrides
+   =========================== */
+@media (max-width: 1024px) {
+  .eduwatt-grid-4 { grid-template-columns: repeat(2, 1fr) !important; }
+}
+
+@media (max-width: 768px) {
+  .eduwatt-grid-4,
+  .eduwatt-grid-2,
+  .eduwatt-grid-auto {
+    grid-template-columns: 1fr !important;
+  }
+  /* Stack any inline grid that uses 2/3/4 columns */
+  [style*="grid-template-columns: repeat(4"],
+  [style*="grid-template-columns: repeat(3"],
+  [style*="grid-template-columns: repeat(2"],
+  [style*="gridTemplateColumns: \"repeat(4"],
+  [style*="gridTemplateColumns: \"repeat(3"],
+  [style*="gridTemplateColumns: \"repeat(2"],
+  [style*="grid-template-columns: 1.6fr 1fr"],
+  [style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+  main { padding: 16px !important; }
+  table { font-size: 11px !important; }
+  .eduwatt-table-wrap, .eduwatt-scroll-x {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  button, a, [role="button"] { min-height: 40px; }
+  h1 { font-size: 15px !important; }
+}
+
+/* Mobile sidebar drawer */
+.eduwatt-sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 49;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+.eduwatt-sidebar-overlay.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+.eduwatt-mobile-menu-btn {
+  display: none;
+}
+@media (max-width: 768px) {
+  .eduwatt-mobile-menu-btn { display: inline-flex !important; }
+  .eduwatt-school-pill { display: none !important; }
+  .eduwatt-sidebar-wrap {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 50;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.4);
+  }
+  .eduwatt-sidebar-wrap.is-open {
+    transform: translateX(0);
+  }
+}
+

@@ -1,22 +1,17 @@
-import Sidebar from "@/components/eduwatt/Sidebar";
-import Topbar from "@/components/eduwatt/Topbar";
+import Shell from "@/components/eduwatt/Shell";
 import KpiRow from "@/components/eduwatt/KpiRow";
 import ChartsRow from "@/components/eduwatt/ChartsRow";
 import BottomRow from "@/components/eduwatt/BottomRow";
+import { useLanguage } from "@/context/LanguageContext";
 
 const Index = () => {
+  const { t } = useLanguage();
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "var(--bg-app)" }}>
-      <Sidebar />
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
-        <Topbar />
-        <main style={{ padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
-          <KpiRow />
-          <ChartsRow />
-          <BottomRow />
-        </main>
-      </div>
-    </div>
+    <Shell title={t("topbar.title.overview") as string}>
+      <KpiRow />
+      <ChartsRow />
+      <BottomRow />
+    </Shell>
   );
 };
 
