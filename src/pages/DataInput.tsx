@@ -478,21 +478,17 @@ export default function DataInput() {
   const sorted = useMemo(() => [...records].sort((a, b) => b.month.localeCompare(a.month)), [records]);
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "var(--bg-app)" }}>
-      <Sidebar />
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
-        <Topbar title={t("topbar.title.dataInput") as string} />
-        <main style={{ padding: 24, display: "grid", gridTemplateColumns: "3fr 2fr", gap: 16 }}>
-          <div>
-            <ManualForm onAdd={(r) => { setRecords((rs) => [...rs, r]); persist(r); }} />
-            <CsvUpload onImport={(recs) => { setRecords((rs) => [...rs, ...recs]); recs.forEach(persist); }} />
-          </div>
-          <RecordsTable records={sorted} onDelete={(idx) => {
-            const target = sorted[idx];
-            setRecords((rs) => rs.filter((r) => r !== target));
-          }} />
-        </main>
+    <Shell title={t("topbar.title.dataInput") as string}>
+      <div className="eduwatt-grid-2" style={{ display: "grid", gridTemplateColumns: "3fr 2fr", gap: 16 }}>
+        <div>
+          <ManualForm onAdd={(r) => { setRecords((rs) => [...rs, r]); persist(r); }} />
+          <CsvUpload onImport={(recs) => { setRecords((rs) => [...rs, ...recs]); recs.forEach(persist); }} />
+        </div>
+        <RecordsTable records={sorted} onDelete={(idx) => {
+          const target = sorted[idx];
+          setRecords((rs) => rs.filter((r) => r !== target));
+        }} />
       </div>
-    </div>
+    </Shell>
   );
 }
