@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import Sidebar from "@/components/eduwatt/Sidebar";
-import Topbar from "@/components/eduwatt/Topbar";
+import Shell from "@/components/eduwatt/Shell";
 import { useLanguage } from "@/context/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
