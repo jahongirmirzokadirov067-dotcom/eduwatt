@@ -2,6 +2,7 @@ import Shell from "@/components/eduwatt/Shell";
 import { mockData } from "@/data/mockData.js";
 import { useLanguage } from "@/context/LanguageContext";
 import { useSchoolData } from "@/hooks/useSchoolData";
+import logo from "@/assets/eduwatt-logo.jpg";
 
 const cardStyle: React.CSSProperties = {
   background: "var(--bg-surface)",
@@ -36,12 +37,14 @@ export default function Reports() {
   const { records, profile } = useSchoolData();
   const week = mockData.weeklyTrend;
   const tariff = Number(profile?.tariff_uzs_per_kwh ?? mockData.gridTariffUzsPerKwh);
+  const schoolName = profile?.school_name || t("reports.unnamedSchool") as string || "Your School";
+  const city = profile?.city || "";
 
   let monthSolar: string, monthGrid: string, monthCo2: string, monthSavedUzs: string;
   if (records.length) {
     const totSolar = records.reduce((s, r) => s + Number(r.solar_generated_kwh ?? 0), 0);
     const totGrid = records.reduce((s, r) => s + Number(r.grid_consumed_kwh ?? 0), 0);
-    const totCo2 = totSolar * 0.5;
+    const totCo2 = totSolar * 0.28;
     monthSolar = totSolar.toFixed(0);
     monthGrid = totGrid.toFixed(0);
     monthCo2 = totCo2.toFixed(0);
@@ -56,89 +59,135 @@ export default function Reports() {
     monthSavedUzs = Math.round(parseFloat(monthSolar) * tariff).toLocaleString();
   }
   const dateLocale = lang === "uz" ? "uz-UZ" : "en-US";
+  const periodLabel = new Date().toLocaleDateString(dateLocale, { month: "long", year: "numeric" });
 
   return (
     <Shell title={t("topbar.title.reports") as string}>
-      <div className="eduwatt-print-hide" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+      {/* Screen-only KPI grid */}
+      <div className="eduwatt-print-hide eduwatt-grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
         <Kpi label={t("reports.kpi.solarMonth") as string} value={monthSolar} unit="kWh" />
         <Kpi label={t("reports.kpi.gridMonth") as string} value={monthGrid} unit="kWh" />
         <Kpi label={t("reports.kpi.co2") as string} value={monthCo2} unit="kg" />
         <Kpi label={t("reports.kpi.cost") as string} value={monthSavedUzs} unit="UZS" />
       </div>
 
-      <div className="eduwatt-print-card" style={cardStyle}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18 }}>
-          <div>
-            <div style={{ fontSize: 18, fontWeight: 600, color: "var(--text-primary)", letterSpacing: "-0.5px" }}>
-              {t("reports.title")}
-            </div>
-            <div style={{ fontSize: 12, color: "var(--text-meta)", marginTop: 4 }}>
-              {mockData.schoolName} · {new Date().toLocaleDateString(dateLocale, { month: "long", year: "numeric" })}
-            </div>
-          </div>
-          <button
-            className="eduwatt-print-hide"
-            onClick={() => window.print()}
-            style={{
-              fontSize: 11,
-              fontWeight: 600,
-              padding: "8px 14px",
-              borderRadius: 8,
-              border: "1px solid var(--border)",
-              background: "var(--accent)",
-              color: "var(--accent-text)",
-              cursor: "pointer",
-              fontFamily: "inherit",
-              letterSpacing: "0.3px",
-            }}
-          >
-            {t("reports.download")}
-          </button>
-        </div>
+      {/* Screen header above the report card */}
+      <div className="eduwatt-print-hide" style={{ display: "flex", justifyContent: "flex-end" }}>
+        <button
+          onClick={() => window.print()}
+          style={{
+            fontSize: 12, fontWeight: 600, padding: "10px 18px", borderRadius: 8,
+            border: "none", background: "var(--accent)", color: "var(--accent-text)",
+            cursor: "pointer", fontFamily: "inherit", letterSpacing: "0.3px",
+          }}
+        >
+          {t("reports.download")}
+        </button>
+      </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 14, marginBottom: 18 }}>
-          <div>
-            <div style={labelStyle}>{t("reports.totalSolar")}</div>
-            <div style={{ fontSize: 22, fontWeight: 600, color: "var(--text-primary)" }}>{monthSolar} kWh</div>
+      <div className="eduwatt-report-doc" style={cardStyle}>
+        {/* Branded header */}
+        <div className="eduwatt-report-header" style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          paddingBottom: 18, borderBottom: "2px solid var(--accent)",
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <img src={logo} alt="EduWatt" style={{ width: 44, height: 44, objectFit: "contain", borderRadius: 6 }} />
+            <div>
+              <div style={{ fontSize: 20, fontWeight: 700, letterSpacing: "-0.5px", color: "var(--text-primary)" }}>EduWatt</div>
+              <div style={{ fontSize: 11, color: "var(--text-meta)", letterSpacing: "0.4px", textTransform: "uppercase" }}>
+                {t("reports.title")}
+              </div>
+            </div>
           </div>
-          <div>
-            <div style={labelStyle}>{t("reports.totalGrid")}</div>
-            <div style={{ fontSize: 22, fontWeight: 600, color: "var(--text-primary)" }}>{monthGrid} kWh</div>
-          </div>
-          <div>
-            <div style={labelStyle}>{t("reports.co2")}</div>
-            <div style={{ fontSize: 22, fontWeight: 600, color: "var(--co2-color)" }}>{monthCo2} kg</div>
-          </div>
-          <div>
-            <div style={labelStyle}>{t("reports.cost")}</div>
-            <div style={{ fontSize: 22, fontWeight: 600, color: "var(--accent)" }}>{monthSavedUzs} UZS</div>
+          <div style={{ textAlign: "right" }}>
+            <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>{schoolName}</div>
+            <div style={{ fontSize: 11, color: "var(--text-meta)", marginTop: 2 }}>
+              {city && <>{city} · </>}{periodLabel}
+            </div>
           </div>
         </div>
 
-        <div style={{ borderTop: "1px solid var(--border-soft)", paddingTop: 14 }}>
-          <div style={labelStyle}>{t("reports.sevenDay")}</div>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
-            <thead>
-              <tr style={{ color: "var(--text-meta)", textAlign: "left" }}>
-                <th style={{ padding: "6px 8px" }}>{t("grid.col.day")}</th>
-                <th style={{ padding: "6px 8px" }}>{t("grid.col.solar")}</th>
-                <th style={{ padding: "6px 8px" }}>{t("grid.col.grid")}</th>
-                <th style={{ padding: "6px 8px" }}>{t("grid.col.co2")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {week.map((d: any) => (
-                <tr key={d.day} style={{ color: "var(--text-secondary)" }}>
-                  <td style={{ padding: "6px 8px", borderTop: "1px solid var(--border-soft)" }}>{d.day}</td>
-                  <td style={{ padding: "6px 8px", borderTop: "1px solid var(--border-soft)" }}>{d.solar}</td>
-                  <td style={{ padding: "6px 8px", borderTop: "1px solid var(--border-soft)" }}>{d.grid}</td>
-                  <td style={{ padding: "6px 8px", borderTop: "1px solid var(--border-soft)" }}>{d.co2}</td>
+        {/* KPI grid */}
+        <div className="eduwatt-report-kpis" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginTop: 22 }}>
+          {[
+            { label: t("reports.totalSolar"), value: monthSolar, unit: "kWh", color: "var(--accent)" },
+            { label: t("reports.totalGrid"), value: monthGrid, unit: "kWh", color: "var(--grid-color)" },
+            { label: t("reports.co2"), value: monthCo2, unit: "kg", color: "var(--co2-color)" },
+            { label: t("reports.cost"), value: monthSavedUzs, unit: "UZS", color: "var(--accent)" },
+          ].map((k, i) => (
+            <div key={i} className="eduwatt-report-kpi" style={{
+              padding: "14px 16px",
+              borderRadius: 10,
+              background: "var(--bg-elevated)",
+              borderLeft: `3px solid ${k.color}`,
+            }}>
+              <div style={{ fontSize: 10, fontWeight: 600, color: "var(--text-meta)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 8 }}>
+                {k.label as string}
+              </div>
+              <div>
+                <span style={{ fontSize: 22, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.5px" }}>{k.value}</span>
+                <span style={{ fontSize: 11, color: "var(--text-muted)", marginLeft: 4 }}>{k.unit}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Trend table */}
+        <div style={{ marginTop: 24 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 10 }}>
+            {t("reports.sevenDay")}
+          </div>
+          <div className="eduwatt-table-wrap" style={{ overflowX: "auto" }}>
+            <table className="eduwatt-report-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+              <thead>
+                <tr>
+                  <th style={thStyle}>{t("grid.col.day")}</th>
+                  <th style={thStyle}>{t("grid.col.solar")}</th>
+                  <th style={thStyle}>{t("grid.col.grid")}</th>
+                  <th style={thStyle}>{t("grid.col.co2")}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {week.map((d: any, i: number) => (
+                  <tr key={d.day} style={{ background: i % 2 === 0 ? "transparent" : "var(--bg-elevated)" }}>
+                    <td style={tdStyle}>{d.day}</td>
+                    <td style={tdStyle}>{d.solar} kWh</td>
+                    <td style={tdStyle}>{d.grid} kWh</td>
+                    <td style={tdStyle}>{d.co2} kg</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="eduwatt-report-footer" style={{
+          marginTop: 22, paddingTop: 14, borderTop: "1px solid var(--border-soft)",
+          display: "flex", justifyContent: "space-between", fontSize: 10, color: "var(--text-meta)",
+        }}>
+          <span>EduWatt · {t("reports.title")}</span>
+          <span>{new Date().toLocaleDateString(dateLocale)}</span>
         </div>
       </div>
     </Shell>
   );
 }
+
+const thStyle: React.CSSProperties = {
+  textAlign: "left",
+  padding: "10px 12px",
+  fontSize: 10,
+  fontWeight: 700,
+  textTransform: "uppercase",
+  letterSpacing: "0.5px",
+  color: "var(--text-meta)",
+  borderBottom: "1.5px solid var(--accent)",
+};
+
+const tdStyle: React.CSSProperties = {
+  padding: "10px 12px",
+  color: "var(--text-secondary)",
+  borderBottom: "1px solid var(--border-soft)",
+};
