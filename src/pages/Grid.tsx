@@ -62,17 +62,23 @@ export default function GridPage() {
       <div style={cardStyle}>
         <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 4 }}>{t("grid.chart.title")}</div>
         <div style={{ fontSize: 10, color: "var(--text-faint)", marginBottom: 18 }}>{t("grid.chart.sub")}</div>
-        <div style={{ display: "grid", gridTemplateColumns: `repeat(${hourly.length}, 1fr)`, gap: 10, alignItems: "end", height: 220 }}>
-          {hourly.map((h) => (
-            <div key={h.hour} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, height: "100%", justifyContent: "flex-end" }}>
-              <div style={{ display: "flex", gap: 3, alignItems: "end", height: "100%", width: "100%", justifyContent: "center" }}>
-                <div style={{ width: "45%", height: `${(h.solar / max) * 100}%`, background: "var(--accent)", borderRadius: 2, minHeight: 3 }} />
-                <div style={{ width: "45%", height: `${(h.grid / max) * 100}%`, background: "var(--grid-color)", borderRadius: 2, minHeight: 3 }} />
+        {monthly.length === 0 ? (
+          <div style={{ fontSize: 12, color: "var(--text-meta)", padding: "40px 0", textAlign: "center" }}>
+            No monthly records yet. Add data on the Data Input page.
+          </div>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: `repeat(${monthly.length}, 1fr)`, gap: 10, alignItems: "end", height: 220 }}>
+            {monthly.map((h) => (
+              <div key={h.label} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, height: "100%", justifyContent: "flex-end" }}>
+                <div style={{ display: "flex", gap: 3, alignItems: "end", height: "100%", width: "100%", justifyContent: "center" }}>
+                  <div style={{ width: "45%", height: `${(h.solar / max) * 100}%`, background: "var(--accent)", borderRadius: 2, minHeight: 3 }} title={`Solar ${h.solar} kWh`} />
+                  <div style={{ width: "45%", height: `${(h.grid / max) * 100}%`, background: "var(--grid-color)", borderRadius: 2, minHeight: 3 }} title={`Grid ${h.grid} kWh`} />
+                </div>
+                <div style={{ fontSize: 10, color: "var(--text-faint)" }}>{h.label}</div>
               </div>
-              <div style={{ fontSize: 10, color: "var(--text-faint)" }}>{h.hour}</div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
         <div style={{ display: "flex", gap: 16, marginTop: 14, fontSize: 11, color: "var(--text-meta)" }}>
           <span><span style={{ display: "inline-block", width: 10, height: 10, background: "var(--accent)", marginRight: 6, borderRadius: 2 }} />{t("grid.legend.solar")}</span>
           <span><span style={{ display: "inline-block", width: 10, height: 10, background: "var(--grid-color)", marginRight: 6, borderRadius: 2 }} />{t("grid.legend.grid")}</span>
