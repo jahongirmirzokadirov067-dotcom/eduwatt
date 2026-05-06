@@ -234,6 +234,7 @@
 }
 @media (max-width: 768px) {
   .eduwatt-mobile-menu-btn { display: inline-flex !important; }
+  .eduwatt-school-pill { display: none !important; }
   .eduwatt-sidebar-wrap {
     position: fixed !important;
     top: 0;
