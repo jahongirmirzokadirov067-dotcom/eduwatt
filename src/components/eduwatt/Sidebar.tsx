@@ -56,6 +56,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}
             <NavLink
               key={`${item.key}-${i}`}
               to={item.to}
+              onClick={() => onNavigate?.()}
               style={{
                 fontSize: 13,
                 fontWeight: isActive ? 600 : 400,
