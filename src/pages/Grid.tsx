@@ -42,12 +42,13 @@ export default function GridPage() {
   const offset = ((solarTotal / (solarTotal + grid)) * 100).toFixed(1);
   const co2Grid = (grid * 0.28).toFixed(1);
 
-  const hourly = solar.map((d) => ({
-    hour: d.hour,
-    solar: d.kwh,
-    grid: Math.max(2, 12 - d.kwh * 0.4 + Math.random() * 1.5),
+  const monthly = (records.length ? records : []).map((r) => ({
+    label: String(r.month).slice(0, 7),
+    solar: Number(r.solar_generated_kwh ?? 0),
+    grid: Number(r.grid_consumed_kwh ?? 0),
   }));
-  const max = Math.max(...hourly.map((h) => Math.max(h.solar, h.grid)));
+  const max = Math.max(...monthly.map((h) => Math.max(h.solar, h.grid)), 1);
+
 
   return (
     <Shell title={t("topbar.title.grid") as string}>
@@ -61,17 +62,23 @@ export default function GridPage() {
       <div style={cardStyle}>
         <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 4 }}>{t("grid.chart.title")}</div>
         <div style={{ fontSize: 10, color: "var(--text-faint)", marginBottom: 18 }}>{t("grid.chart.sub")}</div>
-        <div style={{ display: "grid", gridTemplateColumns: `repeat(${hourly.length}, 1fr)`, gap: 10, alignItems: "end", height: 220 }}>
-          {hourly.map((h) => (
-            <div key={h.hour} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, height: "100%", justifyContent: "flex-end" }}>
-              <div style={{ display: "flex", gap: 3, alignItems: "end", height: "100%", width: "100%", justifyContent: "center" }}>
-                <div style={{ width: "45%", height: `${(h.solar / max) * 100}%`, background: "var(--accent)", borderRadius: 2, minHeight: 3 }} />
-                <div style={{ width: "45%", height: `${(h.grid / max) * 100}%`, background: "var(--grid-color)", borderRadius: 2, minHeight: 3 }} />
+        {monthly.length === 0 ? (
+          <div style={{ fontSize: 12, color: "var(--text-meta)", padding: "40px 0", textAlign: "center" }}>
+            No monthly records yet. Add data on the Data Input page.
+          </div>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: `repeat(${monthly.length}, 1fr)`, gap: 10, alignItems: "end", height: 220 }}>
+            {monthly.map((h) => (
+              <div key={h.label} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, height: "100%", justifyContent: "flex-end" }}>
+                <div style={{ display: "flex", gap: 3, alignItems: "end", height: "100%", width: "100%", justifyContent: "center" }}>
+                  <div style={{ width: "45%", height: `${(h.solar / max) * 100}%`, background: "var(--accent)", borderRadius: 2, minHeight: 3 }} title={`Solar ${h.solar} kWh`} />
+                  <div style={{ width: "45%", height: `${(h.grid / max) * 100}%`, background: "var(--grid-color)", borderRadius: 2, minHeight: 3 }} title={`Grid ${h.grid} kWh`} />
+                </div>
+                <div style={{ fontSize: 10, color: "var(--text-faint)" }}>{h.label}</div>
               </div>
-              <div style={{ fontSize: 10, color: "var(--text-faint)" }}>{h.hour}</div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
         <div style={{ display: "flex", gap: 16, marginTop: 14, fontSize: 11, color: "var(--text-meta)" }}>
           <span><span style={{ display: "inline-block", width: 10, height: 10, background: "var(--accent)", marginRight: 6, borderRadius: 2 }} />{t("grid.legend.solar")}</span>
           <span><span style={{ display: "inline-block", width: 10, height: 10, background: "var(--grid-color)", marginRight: 6, borderRadius: 2 }} />{t("grid.legend.grid")}</span>
