@@ -42,12 +42,13 @@ export default function GridPage() {
   const offset = ((solarTotal / (solarTotal + grid)) * 100).toFixed(1);
   const co2Grid = (grid * 0.28).toFixed(1);
 
-  const hourly = solar.map((d) => ({
-    hour: d.hour,
-    solar: d.kwh,
-    grid: Math.max(2, 12 - d.kwh * 0.4 + Math.random() * 1.5),
+  const monthly = (records.length ? records : []).map((r) => ({
+    label: String(r.month).slice(0, 7),
+    solar: Number(r.solar_generated_kwh ?? 0),
+    grid: Number(r.grid_consumed_kwh ?? 0),
   }));
-  const max = Math.max(...hourly.map((h) => Math.max(h.solar, h.grid)));
+  const max = Math.max(...monthly.map((h) => Math.max(h.solar, h.grid)), 1);
+
 
   return (
     <Shell title={t("topbar.title.grid") as string}>
