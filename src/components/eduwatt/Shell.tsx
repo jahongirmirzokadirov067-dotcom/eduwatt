@@ -10,12 +10,9 @@ export default function Shell({ title, children }: { title: string; children: Re
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", background: "var(--bg-app)" }}>
-      <div className="eduwatt-print-hide eduwatt-sidebar-wrap" data-open={open ? "true" : "false"}>
-        <div className={open ? "eduwatt-sidebar-wrap is-open" : "eduwatt-sidebar-wrap"} style={{ position: "static" }}>
-          <Sidebar onNavigate={() => setOpen(false)} />
-        </div>
+      <div className={`eduwatt-print-hide eduwatt-sidebar-wrap ${open ? "is-open" : ""}`}>
+        <Sidebar onNavigate={() => setOpen(false)} />
       </div>
-      {/* Mobile overlay */}
       <div
         className={`eduwatt-sidebar-overlay ${open ? "is-open" : ""}`}
         onClick={() => setOpen(false)}
