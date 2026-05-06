@@ -14,7 +14,7 @@ const items = [
   { key: "nav.settings", to: "/settings" },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}) {
   const { pathname } = useLocation();
   const { t } = useLanguage();
   return (

@@ -3,7 +3,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useSchoolData } from "@/hooks/useSchoolData";
 import { useAuth } from "@/context/AuthContext";
 
-export default function Topbar({ title }: { title?: string }) {
+export default function Topbar({ title, onMenuClick }: { title?: string; onMenuClick?: () => void }) {
   const { theme, toggle } = useTheme();
   const { lang, setLang, t } = useLanguage();
   const { profile } = useSchoolData();
