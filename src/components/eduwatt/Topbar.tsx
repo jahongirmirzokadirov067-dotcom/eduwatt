@@ -57,8 +57,9 @@ export default function Topbar({ title, onMenuClick }: { title?: string; onMenuC
           {displayTitle}
         </h1>
       </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
         <div
+          className="eduwatt-school-pill"
           style={{
             fontSize: 11,
             fontWeight: 400,
@@ -67,6 +68,10 @@ export default function Topbar({ title, onMenuClick }: { title?: string; onMenuC
             border: "1px solid var(--border)",
             borderRadius: 12,
             padding: "5px 12px",
+            maxWidth: 180,
+            overflow: "hidden",
+            whiteSpace: "nowrap",
+            textOverflow: "ellipsis",
           }}
         >
           {schoolName}
