@@ -1,5 +1,4 @@
 import Shell from "@/components/eduwatt/Shell";
-import { mockData } from "@/data/mockData.js";
 import { useLanguage } from "@/context/LanguageContext";
 import { useSchoolData } from "@/hooks/useSchoolData";
 import logo from "@/assets/eduwatt-logo.jpg";
@@ -32,34 +31,29 @@ function Kpi({ label, value, unit }: { label: string; value: string | number; un
   );
 }
 
+const fmt = (n: number) => (Number.isFinite(n) ? n : 0).toLocaleString(undefined, { maximumFractionDigits: 0 });
+
 export default function Reports() {
   const { t, lang } = useLanguage();
   const { records, profile } = useSchoolData();
-  const week = mockData.weeklyTrend;
-  const tariff = Number(profile?.tariff_uzs_per_kwh ?? mockData.gridTariffUzsPerKwh);
-  const schoolName = profile?.school_name || t("reports.unnamedSchool") as string || "Your School";
+  const tariff = Number(profile?.tariff_uzs_per_kwh ?? 0);
+  const schoolName = profile?.school_name || (t("reports.unnamedSchool") as string) || "Your School";
   const city = profile?.city || "";
-
-  let monthSolar: string, monthGrid: string, monthCo2: string, monthSavedUzs: string;
-  if (records.length) {
-    const totSolar = records.reduce((s, r) => s + Number(r.solar_generated_kwh ?? 0), 0);
-    const totGrid = records.reduce((s, r) => s + Number(r.grid_consumed_kwh ?? 0), 0);
-    const totCo2 = totSolar * 0.28;
-    monthSolar = totSolar.toFixed(0);
-    monthGrid = totGrid.toFixed(0);
-    monthCo2 = totCo2.toFixed(0);
-    monthSavedUzs = Math.round(totSolar * tariff).toLocaleString();
-  } else {
-    const weekSolar = week.reduce((s: number, d: any) => s + d.solar, 0);
-    const weekGrid = week.reduce((s: number, d: any) => s + d.grid, 0);
-    const weekCo2 = week.reduce((s: number, d: any) => s + d.co2, 0);
-    monthSolar = (weekSolar / 7 * 30).toFixed(0);
-    monthGrid = (weekGrid / 7 * 30).toFixed(0);
-    monthCo2 = (weekCo2 / 7 * 30).toFixed(0);
-    monthSavedUzs = Math.round(parseFloat(monthSolar) * tariff).toLocaleString();
-  }
   const dateLocale = lang === "uz" ? "uz-UZ" : "en-US";
   const periodLabel = new Date().toLocaleDateString(dateLocale, { month: "long", year: "numeric" });
+
+  const hasData = records.length > 0;
+  const totSolar = records.reduce((s, r) => s + Number(r.solar_generated_kwh ?? 0), 0);
+  const totGrid = records.reduce((s, r) => s + Number(r.grid_consumed_kwh ?? 0), 0);
+  const totCo2 = totSolar * 0.28;
+  const totSaved = totSolar * tariff;
+
+  const monthSolar = fmt(totSolar);
+  const monthGrid = fmt(totGrid);
+  const monthCo2 = fmt(totCo2);
+  const monthSavedUzs = fmt(totSaved);
+
+  const sortedRecords = [...records].sort((a, b) => String(a.month).localeCompare(String(b.month)));
 
   return (
     <Shell title={t("topbar.title.reports") as string}>
@@ -75,10 +69,12 @@ export default function Reports() {
       <div className="eduwatt-print-hide" style={{ display: "flex", justifyContent: "flex-end" }}>
         <button
           onClick={() => window.print()}
+          disabled={!hasData}
           style={{
             fontSize: 12, fontWeight: 600, padding: "10px 18px", borderRadius: 8,
             border: "none", background: "var(--accent)", color: "var(--accent-text)",
-            cursor: "pointer", fontFamily: "inherit", letterSpacing: "0.3px",
+            cursor: hasData ? "pointer" : "not-allowed", fontFamily: "inherit", letterSpacing: "0.3px",
+            opacity: hasData ? 1 : 0.5,
           }}
         >
           {t("reports.download")}
@@ -108,59 +104,78 @@ export default function Reports() {
           </div>
         </div>
 
-        {/* KPI grid */}
-        <div className="eduwatt-report-kpis" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginTop: 22 }}>
-          {[
-            { label: t("reports.totalSolar"), value: monthSolar, unit: "kWh", color: "var(--accent)" },
-            { label: t("reports.totalGrid"), value: monthGrid, unit: "kWh", color: "var(--grid-color)" },
-            { label: t("reports.co2"), value: monthCo2, unit: "kg", color: "var(--co2-color)" },
-            { label: t("reports.cost"), value: monthSavedUzs, unit: "UZS", color: "var(--accent)" },
-          ].map((k, i) => (
-            <div key={i} className="eduwatt-report-kpi" style={{
-              padding: "14px 16px",
-              borderRadius: 10,
-              background: "var(--bg-elevated)",
-              borderLeft: `3px solid ${k.color}`,
-            }}>
-              <div style={{ fontSize: 10, fontWeight: 600, color: "var(--text-meta)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 8 }}>
-                {k.label as string}
+        {!hasData ? (
+          <div style={{
+            marginTop: 32, padding: "40px 20px", textAlign: "center",
+            background: "var(--bg-elevated)", borderRadius: 10,
+            color: "var(--text-secondary)", fontSize: 13,
+          }}>
+            No data yet — add records in Data Input.
+          </div>
+        ) : (
+          <>
+            {/* KPI grid */}
+            <div className="eduwatt-report-kpis" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginTop: 22 }}>
+              {[
+                { label: t("reports.totalSolar"), value: monthSolar, unit: "kWh", color: "var(--accent)" },
+                { label: t("reports.totalGrid"), value: monthGrid, unit: "kWh", color: "var(--grid-color)" },
+                { label: t("reports.co2"), value: monthCo2, unit: "kg", color: "var(--co2-color)" },
+                { label: t("reports.cost"), value: monthSavedUzs, unit: "UZS", color: "var(--accent)" },
+              ].map((k, i) => (
+                <div key={i} className="eduwatt-report-kpi" style={{
+                  padding: "14px 16px",
+                  borderRadius: 10,
+                  background: "var(--bg-elevated)",
+                  borderLeft: `3px solid ${k.color}`,
+                }}>
+                  <div style={{ fontSize: 10, fontWeight: 600, color: "var(--text-meta)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 8 }}>
+                    {k.label as string}
+                  </div>
+                  <div>
+                    <span style={{ fontSize: 22, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.5px" }}>{k.value}</span>
+                    <span style={{ fontSize: 11, color: "var(--text-muted)", marginLeft: 4 }}>{k.unit}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Monthly breakdown table */}
+            <div style={{ marginTop: 24 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 10 }}>
+                Monthly Breakdown
               </div>
-              <div>
-                <span style={{ fontSize: 22, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.5px" }}>{k.value}</span>
-                <span style={{ fontSize: 11, color: "var(--text-muted)", marginLeft: 4 }}>{k.unit}</span>
+              <div className="eduwatt-table-wrap" style={{ overflowX: "auto" }}>
+                <table className="eduwatt-report-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                  <thead>
+                    <tr>
+                      <th style={thStyle}>Month</th>
+                      <th style={thStyle}>Solar</th>
+                      <th style={thStyle}>Grid</th>
+                      <th style={thStyle}>CO₂</th>
+                      <th style={thStyle}>Saved</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sortedRecords.map((r: any, i: number) => {
+                      const s = Number(r.solar_generated_kwh ?? 0);
+                      const g = Number(r.grid_consumed_kwh ?? 0);
+                      const monthLabel = new Date(String(r.month)).toLocaleDateString(dateLocale, { month: "short", year: "numeric" });
+                      return (
+                        <tr key={r.id ?? i} style={{ background: i % 2 === 0 ? "transparent" : "var(--bg-elevated)" }}>
+                          <td style={tdStyle}>{monthLabel}</td>
+                          <td style={tdStyle}>{fmt(s)} kWh</td>
+                          <td style={tdStyle}>{fmt(g)} kWh</td>
+                          <td style={tdStyle}>{fmt(s * 0.28)} kg</td>
+                          <td style={tdStyle}>{fmt(s * tariff)} UZS</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
             </div>
-          ))}
-        </div>
-
-        {/* Trend table */}
-        <div style={{ marginTop: 24 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 10 }}>
-            {t("reports.sevenDay")}
-          </div>
-          <div className="eduwatt-table-wrap" style={{ overflowX: "auto" }}>
-            <table className="eduwatt-report-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
-              <thead>
-                <tr>
-                  <th style={thStyle}>{t("grid.col.day")}</th>
-                  <th style={thStyle}>{t("grid.col.solar")}</th>
-                  <th style={thStyle}>{t("grid.col.grid")}</th>
-                  <th style={thStyle}>{t("grid.col.co2")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {week.map((d: any, i: number) => (
-                  <tr key={d.day} style={{ background: i % 2 === 0 ? "transparent" : "var(--bg-elevated)" }}>
-                    <td style={tdStyle}>{d.day}</td>
-                    <td style={tdStyle}>{d.solar} kWh</td>
-                    <td style={tdStyle}>{d.grid} kWh</td>
-                    <td style={tdStyle}>{d.co2} kg</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+          </>
+        )}
 
         {/* Footer */}
         <div className="eduwatt-report-footer" style={{
