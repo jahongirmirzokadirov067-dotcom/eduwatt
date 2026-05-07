@@ -80,6 +80,66 @@ export default function Login() {
     navigate(profile ? "/" : "/onboarding", { replace: true });
   };
 
+  const handleDemoLogin = async () => {
+    setBusy(true);
+    const demoEmail = "demo@eduwatt.uz";
+    const demoPassword = "Demo1234!";
+    let { error } = await signIn(demoEmail, demoPassword);
+    if (error) {
+      const { error: suErr } = await signUp(demoEmail, demoPassword);
+      if (suErr && !/registered/i.test(suErr.message)) {
+        setBusy(false);
+        toast.error(suErr.message);
+        return;
+      }
+      const { error: si2 } = await signIn(demoEmail, demoPassword);
+      if (si2) {
+        setBusy(false);
+        toast.error(si2.message);
+        return;
+      }
+    }
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: profile } = await supabase
+        .from("school_profiles")
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (!profile) {
+        await supabase.from("school_profiles").insert({
+          user_id: user.id,
+          school_name: "School No 45",
+          city: "Tashkent",
+          floors: 3,
+          total_rooms: 24,
+          school_type: "Public",
+          solar_capacity_kw: 22.5,
+          panel_area_m2: 44,
+          tariff_uzs_per_kwh: 280,
+          operating_hours: "08:00–17:00",
+        });
+      }
+      const { data: recs } = await supabase
+        .from("monthly_records")
+        .select("id")
+        .eq("user_id", user.id)
+        .limit(1);
+      if (!recs || recs.length === 0) {
+        await supabase.from("monthly_records").insert({
+          user_id: user.id,
+          month: "2026-05-01",
+          grid_consumed_kwh: 183,
+          bill_uzs: 51240,
+          solar_generated_kwh: 18.4,
+          school_days: 21,
+        });
+      }
+    }
+    setBusy(false);
+    navigate("/", { replace: true });
+  };
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password.length < 6) {
@@ -160,6 +220,30 @@ export default function Login() {
             <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} style={inputStyle} />
             <button type="submit" disabled={busy} style={{ ...btnStyle, opacity: busy ? 0.6 : 1 }}>
               {busy ? "Signing in…" : "Sign in"}
+            </button>
+            <div style={{ marginTop: 18, fontSize: 11, color: "#555", textAlign: "center" }}>
+              ⚡️ For judges & reviewers
+            </div>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={handleDemoLogin}
+              style={{
+                width: "100%",
+                background: "transparent",
+                color: "#C8FF00",
+                border: "1px solid #C8FF00",
+                borderRadius: 8,
+                padding: 12,
+                fontSize: 14,
+                fontWeight: 600,
+                cursor: "pointer",
+                fontFamily: "inherit",
+                marginTop: 8,
+                opacity: busy ? 0.6 : 1,
+              }}
+            >
+              Sign in with Demo Account
             </button>
           </form>
         ) : (

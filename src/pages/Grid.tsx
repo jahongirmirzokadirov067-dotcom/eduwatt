@@ -42,12 +42,49 @@ export default function GridPage() {
   const offset = ((solarTotal / (solarTotal + grid)) * 100).toFixed(1);
   const co2Grid = (grid * 0.28).toFixed(1);
 
-  const monthly = (records.length ? records : []).map((r) => ({
-    label: String(r.month).slice(0, 7),
-    solar: Number(r.solar_generated_kwh ?? 0),
-    grid: Number(r.grid_consumed_kwh ?? 0),
+  const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const byMonth: Record<number, { solar: number; grid: number }> = {};
+  records.forEach((r) => {
+    const d = new Date(r.month);
+    const m = d.getMonth();
+    byMonth[m] = byMonth[m] || { solar: 0, grid: 0 };
+    byMonth[m].solar += Number(r.solar_generated_kwh ?? 0);
+    byMonth[m].grid += Number(r.grid_consumed_kwh ?? 0);
+  });
+  const monthly = MONTHS.map((label, i) => ({
+    label,
+    solar: byMonth[i]?.solar ?? 0,
+    grid: byMonth[i]?.grid ?? 0,
   }));
   const max = Math.max(...monthly.map((h) => Math.max(h.solar, h.grid)), 1);
+
+  // Insights
+  const withData = monthly.filter((m) => m.solar > 0 || m.grid > 0);
+  const first = withData[0];
+  const last = withData[withData.length - 1];
+  const offsetOf = (m: { solar: number; grid: number }) => {
+    const tot = m.solar + m.grid;
+    return tot ? (m.solar / tot) * 100 : 0;
+  };
+  const offsetChange = first && last ? offsetOf(last) - offsetOf(first) : 0;
+  const peakGridMonth = withData.reduce((a, b) => (b.grid > a.grid ? b : a), withData[0] || { label: "—", grid: 0, solar: 0 });
+  const avgOffset = withData.length ? withData.reduce((s, m) => s + offsetOf(m), 0) / withData.length : 0;
+  const insights = [
+    `Solar offset ${offsetChange >= 0 ? "improved" : "declined"} by ${Math.abs(offsetChange).toFixed(1)}% since ${first?.label ?? "start"}.`,
+    `Grid dependency peaked in ${peakGridMonth?.label ?? "—"} (${Math.round(peakGridMonth?.grid ?? 0)} kWh).`,
+    `Average solar contribution: ${avgOffset.toFixed(1)}%.`,
+  ];
+
+  // SVG chart geometry
+  const W = 720, H = 240, PAD_L = 40, PAD_R = 16, PAD_T = 16, PAD_B = 28;
+  const innerW = W - PAD_L - PAD_R;
+  const innerH = H - PAD_T - PAD_B;
+  const xAt = (i: number) => PAD_L + (innerW * i) / (MONTHS.length - 1);
+  const yAt = (v: number) => PAD_T + innerH - (v / max) * innerH;
+  const path = (key: "solar" | "grid") =>
+    monthly.map((m, i) => `${i === 0 ? "M" : "L"}${xAt(i).toFixed(1)},${yAt(m[key]).toFixed(1)}`).join(" ");
+  const SOLAR_COLOR = "#C8FF00";
+  const GRID_COLOR = "#3B82F6";
 
 
   return (
@@ -60,28 +97,50 @@ export default function GridPage() {
       </div>
 
       <div style={cardStyle}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 4 }}>{t("grid.chart.title")}</div>
-        <div style={{ fontSize: 10, color: "var(--text-faint)", marginBottom: 18 }}>{t("grid.chart.sub")}</div>
-        {monthly.length === 0 ? (
-          <div style={{ fontSize: 12, color: "var(--text-meta)", padding: "40px 0", textAlign: "center" }}>
-            No monthly records yet. Add data on the Data Input page.
-          </div>
-        ) : (
-          <div style={{ display: "grid", gridTemplateColumns: `repeat(${monthly.length}, 1fr)`, gap: 10, alignItems: "end", height: 220 }}>
-            {monthly.map((h) => (
-              <div key={h.label} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, height: "100%", justifyContent: "flex-end" }}>
-                <div style={{ display: "flex", gap: 3, alignItems: "end", height: "100%", width: "100%", justifyContent: "center" }}>
-                  <div style={{ width: "45%", height: `${(h.solar / max) * 100}%`, background: "var(--accent)", borderRadius: 2, minHeight: 3 }} title={`Solar ${h.solar} kWh`} />
-                  <div style={{ width: "45%", height: `${(h.grid / max) * 100}%`, background: "var(--grid-color)", borderRadius: 2, minHeight: 3 }} title={`Grid ${h.grid} kWh`} />
-                </div>
-                <div style={{ fontSize: 10, color: "var(--text-faint)" }}>{h.label}</div>
-              </div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 4 }}>Solar vs Grid Over Time</div>
+        <div style={{ fontSize: 10, color: "var(--text-faint)", marginBottom: 14 }}>12-month energy comparison (kWh)</div>
+        <div style={{ width: "100%", overflowX: "auto" }}>
+          <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: "block", minWidth: 480 }} preserveAspectRatio="xMidYMid meet">
+            {[0, 0.25, 0.5, 0.75, 1].map((f) => {
+              const y = PAD_T + innerH * (1 - f);
+              return (
+                <g key={f}>
+                  <line x1={PAD_L} x2={W - PAD_R} y1={y} y2={y} stroke="var(--border-soft)" strokeDasharray="2 3" />
+                  <text x={PAD_L - 6} y={y + 3} fontSize="9" textAnchor="end" fill="var(--text-faint)">
+                    {Math.round(max * f)}
+                  </text>
+                </g>
+              );
+            })}
+            {monthly.map((m, i) => (
+              <text key={m.label} x={xAt(i)} y={H - 8} fontSize="10" textAnchor="middle" fill="var(--text-faint)">
+                {m.label}
+              </text>
             ))}
-          </div>
-        )}
-        <div style={{ display: "flex", gap: 16, marginTop: 14, fontSize: 11, color: "var(--text-meta)" }}>
-          <span><span style={{ display: "inline-block", width: 10, height: 10, background: "var(--accent)", marginRight: 6, borderRadius: 2 }} />{t("grid.legend.solar")}</span>
-          <span><span style={{ display: "inline-block", width: 10, height: 10, background: "var(--grid-color)", marginRight: 6, borderRadius: 2 }} />{t("grid.legend.grid")}</span>
+            <path d={path("solar")} fill="none" stroke={SOLAR_COLOR} strokeWidth="2" />
+            <path d={path("grid")} fill="none" stroke={GRID_COLOR} strokeWidth="2" />
+            {monthly.map((m, i) => (
+              <g key={`pts-${i}`}>
+                <circle cx={xAt(i)} cy={yAt(m.solar)} r="3" fill={SOLAR_COLOR}>
+                  <title>{`${m.label} · Solar ${m.solar.toFixed(1)} kWh`}</title>
+                </circle>
+                <circle cx={xAt(i)} cy={yAt(m.grid)} r="3" fill={GRID_COLOR}>
+                  <title>{`${m.label} · Grid ${m.grid.toFixed(1)} kWh`}</title>
+                </circle>
+              </g>
+            ))}
+          </svg>
+        </div>
+        <div style={{ display: "flex", gap: 16, marginTop: 12, fontSize: 11, color: "var(--text-meta)" }}>
+          <span><span style={{ display: "inline-block", width: 10, height: 10, background: SOLAR_COLOR, marginRight: 6, borderRadius: 2 }} />{t("grid.legend.solar")}</span>
+          <span><span style={{ display: "inline-block", width: 10, height: 10, background: GRID_COLOR, marginRight: 6, borderRadius: 2 }} />{t("grid.legend.grid")}</span>
+        </div>
+        <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px solid var(--border-soft)", display: "flex", flexDirection: "column", gap: 6 }}>
+          {insights.map((line, i) => (
+            <div key={i} style={{ fontSize: 11, color: "var(--text-secondary)" }}>
+              <span style={{ color: SOLAR_COLOR, marginRight: 6 }}>›</span>{line}
+            </div>
+          ))}
         </div>
       </div>
 
