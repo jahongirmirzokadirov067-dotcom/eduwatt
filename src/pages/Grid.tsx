@@ -97,28 +97,50 @@ export default function GridPage() {
       </div>
 
       <div style={cardStyle}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 4 }}>{t("grid.chart.title")}</div>
-        <div style={{ fontSize: 10, color: "var(--text-faint)", marginBottom: 18 }}>{t("grid.chart.sub")}</div>
-        {monthly.length === 0 ? (
-          <div style={{ fontSize: 12, color: "var(--text-meta)", padding: "40px 0", textAlign: "center" }}>
-            No monthly records yet. Add data on the Data Input page.
-          </div>
-        ) : (
-          <div style={{ display: "grid", gridTemplateColumns: `repeat(${monthly.length}, 1fr)`, gap: 10, alignItems: "end", height: 220 }}>
-            {monthly.map((h) => (
-              <div key={h.label} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, height: "100%", justifyContent: "flex-end" }}>
-                <div style={{ display: "flex", gap: 3, alignItems: "end", height: "100%", width: "100%", justifyContent: "center" }}>
-                  <div style={{ width: "45%", height: `${(h.solar / max) * 100}%`, background: "var(--accent)", borderRadius: 2, minHeight: 3 }} title={`Solar ${h.solar} kWh`} />
-                  <div style={{ width: "45%", height: `${(h.grid / max) * 100}%`, background: "var(--grid-color)", borderRadius: 2, minHeight: 3 }} title={`Grid ${h.grid} kWh`} />
-                </div>
-                <div style={{ fontSize: 10, color: "var(--text-faint)" }}>{h.label}</div>
-              </div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 4 }}>Solar vs Grid Over Time</div>
+        <div style={{ fontSize: 10, color: "var(--text-faint)", marginBottom: 14 }}>12-month energy comparison (kWh)</div>
+        <div style={{ width: "100%", overflowX: "auto" }}>
+          <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: "block", minWidth: 480 }} preserveAspectRatio="xMidYMid meet">
+            {[0, 0.25, 0.5, 0.75, 1].map((f) => {
+              const y = PAD_T + innerH * (1 - f);
+              return (
+                <g key={f}>
+                  <line x1={PAD_L} x2={W - PAD_R} y1={y} y2={y} stroke="var(--border-soft)" strokeDasharray="2 3" />
+                  <text x={PAD_L - 6} y={y + 3} fontSize="9" textAnchor="end" fill="var(--text-faint)">
+                    {Math.round(max * f)}
+                  </text>
+                </g>
+              );
+            })}
+            {monthly.map((m, i) => (
+              <text key={m.label} x={xAt(i)} y={H - 8} fontSize="10" textAnchor="middle" fill="var(--text-faint)">
+                {m.label}
+              </text>
             ))}
-          </div>
-        )}
-        <div style={{ display: "flex", gap: 16, marginTop: 14, fontSize: 11, color: "var(--text-meta)" }}>
-          <span><span style={{ display: "inline-block", width: 10, height: 10, background: "var(--accent)", marginRight: 6, borderRadius: 2 }} />{t("grid.legend.solar")}</span>
-          <span><span style={{ display: "inline-block", width: 10, height: 10, background: "var(--grid-color)", marginRight: 6, borderRadius: 2 }} />{t("grid.legend.grid")}</span>
+            <path d={path("solar")} fill="none" stroke={SOLAR_COLOR} strokeWidth="2" />
+            <path d={path("grid")} fill="none" stroke={GRID_COLOR} strokeWidth="2" />
+            {monthly.map((m, i) => (
+              <g key={`pts-${i}`}>
+                <circle cx={xAt(i)} cy={yAt(m.solar)} r="3" fill={SOLAR_COLOR}>
+                  <title>{`${m.label} · Solar ${m.solar.toFixed(1)} kWh`}</title>
+                </circle>
+                <circle cx={xAt(i)} cy={yAt(m.grid)} r="3" fill={GRID_COLOR}>
+                  <title>{`${m.label} · Grid ${m.grid.toFixed(1)} kWh`}</title>
+                </circle>
+              </g>
+            ))}
+          </svg>
+        </div>
+        <div style={{ display: "flex", gap: 16, marginTop: 12, fontSize: 11, color: "var(--text-meta)" }}>
+          <span><span style={{ display: "inline-block", width: 10, height: 10, background: SOLAR_COLOR, marginRight: 6, borderRadius: 2 }} />{t("grid.legend.solar")}</span>
+          <span><span style={{ display: "inline-block", width: 10, height: 10, background: GRID_COLOR, marginRight: 6, borderRadius: 2 }} />{t("grid.legend.grid")}</span>
+        </div>
+        <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px solid var(--border-soft)", display: "flex", flexDirection: "column", gap: 6 }}>
+          {insights.map((line, i) => (
+            <div key={i} style={{ fontSize: 11, color: "var(--text-secondary)" }}>
+              <span style={{ color: SOLAR_COLOR, marginRight: 6 }}>›</span>{line}
+            </div>
+          ))}
         </div>
       </div>
 
