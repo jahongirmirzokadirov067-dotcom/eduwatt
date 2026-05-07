@@ -42,12 +42,49 @@ export default function GridPage() {
   const offset = ((solarTotal / (solarTotal + grid)) * 100).toFixed(1);
   const co2Grid = (grid * 0.28).toFixed(1);
 
-  const monthly = (records.length ? records : []).map((r) => ({
-    label: String(r.month).slice(0, 7),
-    solar: Number(r.solar_generated_kwh ?? 0),
-    grid: Number(r.grid_consumed_kwh ?? 0),
+  const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const byMonth: Record<number, { solar: number; grid: number }> = {};
+  records.forEach((r) => {
+    const d = new Date(r.month);
+    const m = d.getMonth();
+    byMonth[m] = byMonth[m] || { solar: 0, grid: 0 };
+    byMonth[m].solar += Number(r.solar_generated_kwh ?? 0);
+    byMonth[m].grid += Number(r.grid_consumed_kwh ?? 0);
+  });
+  const monthly = MONTHS.map((label, i) => ({
+    label,
+    solar: byMonth[i]?.solar ?? 0,
+    grid: byMonth[i]?.grid ?? 0,
   }));
   const max = Math.max(...monthly.map((h) => Math.max(h.solar, h.grid)), 1);
+
+  // Insights
+  const withData = monthly.filter((m) => m.solar > 0 || m.grid > 0);
+  const first = withData[0];
+  const last = withData[withData.length - 1];
+  const offsetOf = (m: { solar: number; grid: number }) => {
+    const tot = m.solar + m.grid;
+    return tot ? (m.solar / tot) * 100 : 0;
+  };
+  const offsetChange = first && last ? offsetOf(last) - offsetOf(first) : 0;
+  const peakGridMonth = withData.reduce((a, b) => (b.grid > a.grid ? b : a), withData[0] || { label: "—", grid: 0, solar: 0 });
+  const avgOffset = withData.length ? withData.reduce((s, m) => s + offsetOf(m), 0) / withData.length : 0;
+  const insights = [
+    `Solar offset ${offsetChange >= 0 ? "improved" : "declined"} by ${Math.abs(offsetChange).toFixed(1)}% since ${first?.label ?? "start"}.`,
+    `Grid dependency peaked in ${peakGridMonth?.label ?? "—"} (${Math.round(peakGridMonth?.grid ?? 0)} kWh).`,
+    `Average solar contribution: ${avgOffset.toFixed(1)}%.`,
+  ];
+
+  // SVG chart geometry
+  const W = 720, H = 240, PAD_L = 40, PAD_R = 16, PAD_T = 16, PAD_B = 28;
+  const innerW = W - PAD_L - PAD_R;
+  const innerH = H - PAD_T - PAD_B;
+  const xAt = (i: number) => PAD_L + (innerW * i) / (MONTHS.length - 1);
+  const yAt = (v: number) => PAD_T + innerH - (v / max) * innerH;
+  const path = (key: "solar" | "grid") =>
+    monthly.map((m, i) => `${i === 0 ? "M" : "L"}${xAt(i).toFixed(1)},${yAt(m[key]).toFixed(1)}`).join(" ");
+  const SOLAR_COLOR = "#C8FF00";
+  const GRID_COLOR = "#3B82F6";
 
 
   return (
