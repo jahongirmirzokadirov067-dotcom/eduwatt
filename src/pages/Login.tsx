@@ -161,6 +161,30 @@ export default function Login() {
             <button type="submit" disabled={busy} style={{ ...btnStyle, opacity: busy ? 0.6 : 1 }}>
               {busy ? "Signing in…" : "Sign in"}
             </button>
+            <div style={{ marginTop: 18, fontSize: 11, color: "#555", textAlign: "center" }}>
+              ⚡️ For judges & reviewers
+            </div>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={handleDemoLogin}
+              style={{
+                width: "100%",
+                background: "transparent",
+                color: "#C8FF00",
+                border: "1px solid #C8FF00",
+                borderRadius: 8,
+                padding: 12,
+                fontSize: 14,
+                fontWeight: 600,
+                cursor: "pointer",
+                fontFamily: "inherit",
+                marginTop: 8,
+                opacity: busy ? 0.6 : 1,
+              }}
+            >
+              Sign in with Demo Account
+            </button>
           </form>
         ) : (
           <form onSubmit={handleSignUp}>
