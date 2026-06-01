@@ -3,7 +3,6 @@ import Shell from "@/components/eduwatt/Shell";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
-import { mockData } from "@/data/mockData.js";
 import { toast } from "sonner";
 
 interface Zone {
@@ -46,19 +45,7 @@ export default function Zones() {
   const load = async () => {
     if (!user) return;
     const { data } = await supabase.from("zones").select("*").eq("user_id", user.id).order("created_at");
-    if (data && data.length > 0) {
-      setZones(data as Zone[]);
-    } else if (data && data.length === 0) {
-      // Seed with mock data on first visit
-      const seed = mockData.zones.map((z: any) => ({
-        user_id: user.id,
-        name: z.name,
-        zone_type: z.type,
-        current_kw: z.kw,
-      }));
-      const { data: inserted } = await supabase.from("zones").insert(seed).select();
-      if (inserted) setZones(inserted as Zone[]);
-    }
+    setZones((data as Zone[]) ?? []);
   };
 
   useEffect(() => {
