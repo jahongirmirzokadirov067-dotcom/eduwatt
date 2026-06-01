@@ -104,7 +104,6 @@ export default function Solar() {
         <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 14 }}>{t("solar.panelGroups")}</div>
         <div style={{ fontSize: 12, color: "var(--text-meta)", padding: "10px 0" }}>
           Configured capacity: <span style={{ color: "var(--text-secondary)", fontWeight: 600 }}>{installed} kW</span>
-          {profile?.panel_area_m2 ? <> · Panel area: <span style={{ color: "var(--text-secondary)", fontWeight: 600 }}>{profile.panel_area_m2} m²</span></> : null}
         </div>
       </div>
     </Shell>
