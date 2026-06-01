@@ -1,6 +1,4 @@
 import Shell from "@/components/eduwatt/Shell";
-import { mockData } from "@/data/mockData.js";
-import { useSolarData } from "@/hooks/useSolarData";
 import { useLanguage } from "@/context/LanguageContext";
 import { useSchoolData } from "@/hooks/useSchoolData";
 
@@ -33,13 +31,16 @@ function Kpi({ label, value, unit }: { label: string; value: string | number; un
 }
 
 export default function GridPage() {
-  const { data: solar } = useSolarData();
-  const { records } = useSchoolData();
+  const { records, profile, latest } = useSchoolData();
   const { t } = useLanguage();
-  const grid = mockData.kpis.gridConsumed.value;
-  const solarTotal = solar.reduce((s, d) => s + d.kwh, 0);
-  const cost = Math.round(grid * mockData.gridTariffUzsPerKwh);
-  const offset = ((solarTotal / (solarTotal + grid)) * 100).toFixed(1);
+  const tariff = Number(profile?.tariff_uzs_per_kwh ?? 280);
+  const days = latest && Number(latest.school_days) > 0 ? Number(latest.school_days) : 21;
+  const gridMonthly = Number(latest?.grid_consumed_kwh ?? 0);
+  const solarMonthly = Number(latest?.solar_generated_kwh ?? 0);
+  const grid = Number((gridMonthly / days).toFixed(1));
+  const solarDaily = Number((solarMonthly / days).toFixed(1));
+  const cost = Math.round(grid * tariff);
+  const offset = gridMonthly + solarMonthly > 0 ? ((solarMonthly / (solarMonthly + gridMonthly)) * 100).toFixed(1) : "0";
   const co2Grid = (grid * 0.28).toFixed(1);
 
   const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
