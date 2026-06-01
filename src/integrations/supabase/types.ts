@@ -14,6 +14,105 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_recommendations: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string
+          effort: string | null
+          id: string
+          impact_notes: string | null
+          implemented_at: string | null
+          month: string | null
+          priority: string
+          projected_co2_kg_per_month: number | null
+          projected_saving_kwh_per_day: number | null
+          rec_key: string | null
+          status: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description: string
+          effort?: string | null
+          id?: string
+          impact_notes?: string | null
+          implemented_at?: string | null
+          month?: string | null
+          priority?: string
+          projected_co2_kg_per_month?: number | null
+          projected_saving_kwh_per_day?: number | null
+          rec_key?: string | null
+          status?: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string
+          effort?: string | null
+          id?: string
+          impact_notes?: string | null
+          implemented_at?: string | null
+          month?: string | null
+          priority?: string
+          projected_co2_kg_per_month?: number | null
+          projected_saving_kwh_per_day?: number | null
+          rec_key?: string | null
+          status?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      alerts: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          node: string | null
+          recommendation: string | null
+          resolved: boolean
+          resolved_at: string | null
+          severity: string
+          user_id: string
+          waste_kwh_per_day: number | null
+          waste_uzs_per_day: number | null
+          zone: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          node?: string | null
+          recommendation?: string | null
+          resolved?: boolean
+          resolved_at?: string | null
+          severity?: string
+          user_id: string
+          waste_kwh_per_day?: number | null
+          waste_uzs_per_day?: number | null
+          zone: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          node?: string | null
+          recommendation?: string | null
+          resolved?: boolean
+          resolved_at?: string | null
+          severity?: string
+          user_id?: string
+          waste_kwh_per_day?: number | null
+          waste_uzs_per_day?: number | null
+          zone?: string
+        }
+        Relationships: []
+      }
       monthly_records: {
         Row: {
           bill_uzs: number | null
