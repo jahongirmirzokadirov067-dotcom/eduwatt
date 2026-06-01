@@ -168,7 +168,8 @@ export default function GridPage() {
                 <td style={{ padding: "10px 8px", borderBottom: "1px solid var(--border-soft)" }}>{d.grid}</td>
                 <td style={{ padding: "10px 8px", borderBottom: "1px solid var(--border-soft)" }}>{d.co2}</td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>
