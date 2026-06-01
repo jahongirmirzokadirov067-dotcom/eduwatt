@@ -1,7 +1,7 @@
 import Shell from "@/components/eduwatt/Shell";
 import { useSolarData } from "@/hooks/useSolarData";
-import { mockData } from "@/data/mockData.js";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSchoolData } from "@/hooks/useSchoolData";
 
 const cardStyle: React.CSSProperties = {
   background: "var(--bg-surface)",
@@ -72,12 +72,13 @@ function AreaChart({ data }: { data: { hour: string; kwh: number }[] }) {
 
 export default function Solar() {
   const { data, isLive } = useSolarData();
+  const { profile } = useSchoolData();
   const { t } = useLanguage();
   const total = data.reduce((s, d) => s + d.kwh, 0);
-  const peak = data.reduce((m, d) => (d.kwh > m.kwh ? d : m), data[0]);
-  const installed = mockData.installedCapacityKw;
-  const peakKw = Math.max(...data.map((d) => d.kwh));
-  const utilization = ((peakKw / installed) * 100).toFixed(1);
+  const peak = data.length ? data.reduce((m, d) => (d.kwh > m.kwh ? d : m), data[0]) : { hour: "—", kwh: 0 };
+  const installed = Number(profile?.solar_capacity_kw ?? 0) || 22.5;
+  const peakKw = data.length ? Math.max(...data.map((d) => d.kwh)) : 0;
+  const utilization = installed ? ((peakKw / installed) * 100).toFixed(1) : "0";
   const monthly = (total * 30).toFixed(0);
 
   return (
@@ -89,32 +90,21 @@ export default function Solar() {
         <Kpi label={t("solar.kpi.utilization") as string} value={`${utilization}`} unit={t("solar.kpi.utilizationUnit", { kw: installed }) as string} />
         <Kpi label={t("solar.kpi.monthly") as string} value={monthly} unit="kWh" />
       </div>
-      <AreaChart data={data} />
+      {data.length > 0 ? (
+        <AreaChart data={data} />
+      ) : (
+        <div style={cardStyle}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 4 }}>HOURLY IRRADIANCE</div>
+          <div style={{ fontSize: 12, color: "var(--text-meta)", padding: "30px 0", textAlign: "center" }}>
+            Live solar data unavailable.
+          </div>
+        </div>
+      )}
       <div style={cardStyle}>
         <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 14 }}>{t("solar.panelGroups")}</div>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
-          <thead>
-            <tr style={{ color: "var(--text-meta)", textAlign: "left" }}>
-              <th style={{ padding: "8px 8px", borderBottom: "1px solid var(--border)", fontWeight: 600 }}>{t("solar.col.panelGroup")}</th>
-              <th style={{ padding: "8px 8px", borderBottom: "1px solid var(--border)", fontWeight: 600 }}>{t("solar.col.orientation")}</th>
-              <th style={{ padding: "8px 8px", borderBottom: "1px solid var(--border)", fontWeight: 600 }}>{t("solar.col.capacity")}</th>
-              <th style={{ padding: "8px 8px", borderBottom: "1px solid var(--border)", fontWeight: 600 }}>{t("solar.col.todayOutput")}</th>
-              <th style={{ padding: "8px 8px", borderBottom: "1px solid var(--border)", fontWeight: 600 }}>{t("solar.col.efficiency")}</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {mockData.panelGroups.map((p: any) => (
-              <tr key={p.name} style={{ color: "var(--text-secondary)" }}>
-                <td style={{ padding: "10px 8px", borderBottom: "1px solid var(--border-soft)" }}>{p.name}</td>
-                <td style={{ padding: "10px 8px", borderBottom: "1px solid var(--border-soft)" }}>{p.orientation}</td>
-                <td style={{ padding: "10px 8px", borderBottom: "1px solid var(--border-soft)" }}>{p.capacityKw} kW</td>
-                <td style={{ padding: "10px 8px", borderBottom: "1px solid var(--border-soft)" }}>{p.todayKwh} kWh</td>
-                <td style={{ padding: "10px 8px", borderBottom: "1px solid var(--border-soft)", color: "var(--accent)" }}>{p.efficiency}%</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div style={{ fontSize: 12, color: "var(--text-meta)", padding: "10px 0" }}>
+          Configured capacity: <span style={{ color: "var(--text-secondary)", fontWeight: 600 }}>{installed} kW</span>
+        </div>
       </div>
     </Shell>
   );

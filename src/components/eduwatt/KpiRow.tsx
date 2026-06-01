@@ -1,6 +1,6 @@
-import { mockData } from "@/data/mockData.js";
 import { useLanguage } from "@/context/LanguageContext";
 import { useSchoolData } from "@/hooks/useSchoolData";
+import { useAlerts } from "@/hooks/useAlerts";
 
 const cardStyle: React.CSSProperties = {
   background: "var(--bg-surface)",
@@ -60,32 +60,33 @@ function Card({
   );
 }
 
-const safeNum = (v: number, fallback: number) =>
-  Number.isFinite(v) && !Number.isNaN(v) ? Number(v.toFixed(1)) : fallback;
+const safeNum = (v: number) => (Number.isFinite(v) && !Number.isNaN(v) ? Number(v.toFixed(1)) : 0);
 
 export default function KpiRow() {
-  const k = mockData.kpis;
   const { t } = useLanguage();
   const { profile, latest } = useSchoolData();
+  const { alerts } = useAlerts();
 
   const tariff = Number(profile?.tariff_uzs_per_kwh ?? 280);
   const days = latest && Number(latest.school_days) > 0 ? Number(latest.school_days) : 21;
   const solarMonthly = latest ? Number(latest.solar_generated_kwh ?? 0) : 0;
   const gridMonthly = latest ? Number(latest.grid_consumed_kwh ?? 0) : 0;
 
-  const solarVal = latest ? safeNum(solarMonthly / days, k.solarGenerated.value) : k.solarGenerated.value;
-  const gridVal = latest ? safeNum(gridMonthly / days, k.gridConsumed.value) : k.gridConsumed.value;
-  const co2Val = latest ? safeNum((solarMonthly * 0.5) / days, k.co2Avoided.value) : k.co2Avoided.value;
+  const solarVal = safeNum(solarMonthly / days);
+  const gridVal = safeNum(gridMonthly / days);
+  const co2Val = safeNum((solarMonthly * 0.5) / days);
   const savingUzs = Math.round(Number(solarVal) * tariff);
   const savingDelta = `≈ ${savingUzs.toLocaleString()} UZS saved`;
 
+  const activeAlerts = alerts.filter((a) => !a.resolved);
+  const wasteVal = activeAlerts.length;
+
   return (
     <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
-      <Card accent="var(--accent)" label={t("kpi.solarGenerated") as string} value={solarVal} unit={k.solarGenerated.unit} delta={savingDelta} deltaPositive={true} />
-      <Card accent="var(--grid-color)" label={t("kpi.gridConsumed") as string} value={gridVal} unit={k.gridConsumed.unit} delta={t("kpi.delta.vsYesterdayNeg", { p: "4.1" }) as string} deltaPositive={k.gridConsumed.deltaPositive} />
-      <Card accent="var(--co2-color)" label={t("kpi.co2Avoided") as string} value={co2Val} unit={k.co2Avoided.unit} delta={t("kpi.delta.vsYesterdayPos", { p: "8.2" }) as string} deltaPositive={k.co2Avoided.deltaPositive} />
-      <Card accent="var(--warn-color)" label={t("kpi.wasteAlerts") as string} value={k.wasteAlerts.value} unit={t("kpi.unit.active") as string} delta={t("kpi.delta.unresolved", { n: 2 }) as string} deltaPositive={k.wasteAlerts.deltaPositive} />
+      <Card accent="var(--accent)" label={t("kpi.solarGenerated") as string} value={solarVal} unit="kWh" delta={savingDelta} deltaPositive={true} />
+      <Card accent="var(--grid-color)" label={t("kpi.gridConsumed") as string} value={gridVal} unit="kWh" delta={t("kpi.delta.vsYesterdayNeg", { p: "4.1" }) as string} deltaPositive={true} />
+      <Card accent="var(--co2-color)" label={t("kpi.co2Avoided") as string} value={co2Val} unit="kg" delta={t("kpi.delta.vsYesterdayPos", { p: "8.2" }) as string} deltaPositive={true} />
+      <Card accent="var(--warn-color)" label={t("kpi.wasteAlerts") as string} value={wasteVal} unit={t("kpi.unit.active") as string} delta={t("kpi.delta.unresolved", { n: wasteVal }) as string} deltaPositive={wasteVal === 0} />
     </div>
   );
 }
-

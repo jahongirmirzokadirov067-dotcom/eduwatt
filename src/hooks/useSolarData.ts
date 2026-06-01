@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { mockData } from "@/data/mockData.js";
 
 export interface SolarPoint {
   hour: string;
@@ -13,7 +12,7 @@ const URL =
   "https://api.open-meteo.com/v1/forecast?latitude=41.2995&longitude=69.2401&hourly=shortwave_radiation,direct_radiation&timezone=Asia%2FTashkent&forecast_days=1";
 
 export function useSolarData() {
-  const [data, setData] = useState<SolarPoint[]>(mockData.hourlySolar as SolarPoint[]);
+  const [data, setData] = useState<SolarPoint[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isLive, setIsLive] = useState(false);
@@ -45,7 +44,7 @@ export function useSolarData() {
       setIsLive(true);
     } catch (e: any) {
       setError(e?.message || "Failed to fetch");
-      setData(mockData.hourlySolar as SolarPoint[]);
+      setData([]);
       setIsLive(false);
     } finally {
       setLoading(false);
@@ -58,7 +57,6 @@ export function useSolarData() {
     return () => {
       if (timerRef.current) window.clearInterval(timerRef.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return { data, loading, error, isLive, refresh: fetchData };

@@ -1,9 +1,10 @@
+import { useEffect, useState } from "react";
 import { useSolarData } from "@/hooks/useSolarData";
-import { mockData } from "@/data/mockData.js";
 import { useLanguage } from "@/context/LanguageContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/context/AuthContext";
 
 function lerpColorCSS(t: number, base: string, peak: string) {
-  // Use CSS color-mix for theme-aware interpolation
   const pct = Math.round(t * 100);
   return `color-mix(in srgb, ${peak} ${pct}%, ${base})`;
 }
@@ -43,88 +44,60 @@ function SolarChart() {
         </div>
         <span
           style={{
-            fontSize: 10,
-            fontWeight: 600,
-            letterSpacing: "0.3px",
-            padding: "3px 8px",
-            borderRadius: 999,
-            border: "1px solid var(--border)",
+            fontSize: 10, fontWeight: 600, letterSpacing: "0.3px",
+            padding: "3px 8px", borderRadius: 999, border: "1px solid var(--border)",
             color: isLive ? "var(--accent)" : "var(--text-meta)",
-            background: "var(--bg-elevated)",
-            whiteSpace: "nowrap",
+            background: "var(--bg-elevated)", whiteSpace: "nowrap",
           }}
         >
           {isLive ? t("chart.live") : t("chart.estimated")}
         </span>
       </div>
 
-      {error && (
-        <div
-          style={{
-            fontSize: 11,
-            color: "var(--crit-color)",
-            border: "1px solid var(--crit-color)",
-            borderRadius: 8,
-            padding: "6px 10px",
-            marginBottom: 12,
-            background: "color-mix(in srgb, var(--crit-color) 8%, transparent)",
-          }}
-        >
+      {error && !data.length && (
+        <div style={{ fontSize: 11, color: "var(--text-meta)", padding: "30px 0", textAlign: "center" }}>
           {t("chart.solarUnavailable")}
         </div>
       )}
 
-      {loading && data === mockData.hourlySolar ? (
+      {loading && !data.length ? (
         <div style={{ display: "flex", flexDirection: "column", gap: 10, height: 200, justifyContent: "center" }}>
           <div className="eduwatt-skeleton" style={{ height: 14, width: "40%" }} />
           <div className="eduwatt-skeleton" style={{ height: 14, width: "70%" }} />
           <div className="eduwatt-skeleton" style={{ height: 14, width: "55%" }} />
         </div>
-      ) : (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: `repeat(${data.length}, 1fr)`,
-            gap: 8,
-            alignItems: "end",
-            height: 200,
-          }}
-        >
+      ) : data.length ? (
+        <div style={{ display: "grid", gridTemplateColumns: `repeat(${data.length}, 1fr)`, gap: 8, alignItems: "end", height: 200 }}>
           {data.map((d) => {
             const t = d.kwh / max;
             return (
               <div key={d.hour} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, height: "100%", justifyContent: "flex-end" }}>
                 <div style={{ fontSize: 10, color: "var(--text-faint)" }}>{d.kwh.toFixed(1)}</div>
-                <div
-                  style={{
-                    width: "100%",
-                    height: `${Math.max(t * 100, 2)}%`,
-                    background: lerpColorCSS(t, "var(--accent-soft-bg)", "var(--accent)"),
-                    borderRadius: 2,
-                    minHeight: 4,
-                  }}
-                />
+                <div style={{ width: "100%", height: `${Math.max(t * 100, 2)}%`, background: lerpColorCSS(t, "var(--accent-soft-bg)", "var(--accent)"), borderRadius: 2, minHeight: 4 }} />
                 <div style={{ fontSize: 10, color: "var(--text-faint)" }}>{d.hour}</div>
               </div>
             );
           })}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
 
+interface Zone { id: string; name: string; zone_type: string; current_kw: number }
+
 function ZonesChart() {
-  const zones = mockData.zones;
+  const { user } = useAuth();
   const { t } = useLanguage();
-  const zoneKey: Record<string, string> = {
-    "Classrooms": "zone.classrooms",
-    "Science lab": "zone.scienceLab",
-    "Canteen": "zone.canteen",
-    "Hallways": "zone.hallways",
-    "Admin": "zone.admin",
-  };
-  const max = Math.max(...zones.map((z) => z.kw));
+  const [zones, setZones] = useState<Zone[]>([]);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("zones").select("*").eq("user_id", user.id).order("created_at")
+      .then(({ data }) => setZones((data as Zone[]) ?? []));
+  }, [user]);
+
+  const max = Math.max(...zones.map((z) => Number(z.current_kw) || 0), 0.001);
   const colorFor = (type: string) =>
     type === "thermal" ? "var(--warn-color)" : type === "waste" ? "var(--crit-color)" : "var(--grid-color)";
 
@@ -132,19 +105,25 @@ function ZonesChart() {
     <div style={cardStyle}>
       <div style={headingStyle}>{t("chart.zone")}</div>
       <div style={subStyle}>{t("chart.zoneSub")}</div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-        {zones.map((z) => (
-          <div key={z.name}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-              <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>{t(zoneKey[z.name] || z.name)}</span>
-              <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-primary)", letterSpacing: "-0.5px" }}>{z.kw} kW</span>
+      {zones.length === 0 ? (
+        <div style={{ fontSize: 12, color: "var(--text-meta)", padding: "20px 0" }}>
+          No zones yet — add zones in the Zones page.
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          {zones.map((z) => (
+            <div key={z.id}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>{z.name}</span>
+                <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-primary)", letterSpacing: "-0.5px" }}>{Number(z.current_kw).toFixed(1)} kW</span>
+              </div>
+              <div style={{ height: 8, background: "var(--bg-elevated)", borderRadius: 2, overflow: "hidden" }}>
+                <div style={{ width: `${(Number(z.current_kw) / max) * 100}%`, height: "100%", background: colorFor(z.zone_type), borderRadius: 2 }} />
+              </div>
             </div>
-            <div style={{ height: 8, background: "var(--bg-elevated)", borderRadius: 2, overflow: "hidden" }}>
-              <div style={{ width: `${(z.kw / max) * 100}%`, height: "100%", background: colorFor(z.type), borderRadius: 2 }} />
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
