@@ -78,12 +78,48 @@ function FactCard({ stat, unit, body, source, sourceLabel }: { stat: string; uni
 export default function Impact() {
   const { t } = useLanguage();
   const sourceLabel = t("impact.source") as string;
+  const { implementedThisQuarter, implemented, active } = useAiRecommendations();
+  const { records } = useSchoolData();
+
+  // Month-over-month trend on grid consumption (lower is better)
+  const last = records[records.length - 1];
+  const prev = records[records.length - 2];
+  const gridDelta = last && prev
+    ? ((Number(last.grid_consumed_kwh ?? 0) - Number(prev.grid_consumed_kwh ?? 0)) / Math.max(Number(prev.grid_consumed_kwh ?? 0), 1)) * 100
+    : 0;
+  const solarDelta = last && prev
+    ? ((Number(last.solar_generated_kwh ?? 0) - Number(prev.solar_generated_kwh ?? 0)) / Math.max(Number(prev.solar_generated_kwh ?? 0), 1)) * 100
+    : 0;
+
   return (
     <Shell title={t("topbar.title.impact") as string}>
       <div>
         <div style={{ fontSize: 22, fontWeight: 600, color: "#f0ede6", letterSpacing: "-0.5px" }}>{t("impact.title")}</div>
         <div style={{ fontSize: 13, color: "#888", marginTop: 4 }}>{t("impact.subtitle")}</div>
       </div>
+
+      <div style={{ background: "#0d1a0d", border: "1px solid #1a2e1a", borderRadius: 12, padding: "20px 24px", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+        <div>
+          <div style={{ fontSize: 10, fontWeight: 600, color: "#4a8a4a", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 6 }}>Recommendations implemented this quarter</div>
+          <div style={{ fontSize: 32, fontWeight: 600, color: "#C8FF00", letterSpacing: "-1px", lineHeight: 1 }}>{implementedThisQuarter}</div>
+          <div style={{ fontSize: 11, color: "#888", marginTop: 6 }}>{implemented.length} total implemented · {active.length} active</div>
+        </div>
+        <div>
+          <div style={{ fontSize: 10, fontWeight: 600, color: "#4a8a4a", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 6 }}>Grid use MoM</div>
+          <div style={{ fontSize: 32, fontWeight: 600, color: gridDelta <= 0 ? "#C8FF00" : "#FF8C42", letterSpacing: "-1px", lineHeight: 1 }}>
+            {gridDelta >= 0 ? "+" : ""}{gridDelta.toFixed(1)}%
+          </div>
+          <div style={{ fontSize: 11, color: "#888", marginTop: 6 }}>vs previous month</div>
+        </div>
+        <div>
+          <div style={{ fontSize: 10, fontWeight: 600, color: "#4a8a4a", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 6 }}>Solar gen MoM</div>
+          <div style={{ fontSize: 32, fontWeight: 600, color: solarDelta >= 0 ? "#C8FF00" : "#FF8C42", letterSpacing: "-1px", lineHeight: 1 }}>
+            {solarDelta >= 0 ? "+" : ""}{solarDelta.toFixed(1)}%
+          </div>
+          <div style={{ fontSize: 11, color: "#888", marginTop: 6 }}>vs previous month</div>
+        </div>
+      </div>
+
 
       <div style={bannerStyle}>
         <div style={{ flex: 1, minWidth: 0 }}>
