@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
-import { mockData } from "@/data/mockData.js";
-import { fetchAIRecommendations, type Recommendation } from "@/services/aiRecommendations";
 import { useLanguage } from "@/context/LanguageContext";
+import { useAlerts } from "@/hooks/useAlerts";
+import { useAiRecommendations } from "@/hooks/useAiRecommendations";
+import { useSchoolData } from "@/hooks/useSchoolData";
 
 const headingStyle: React.CSSProperties = {
   fontSize: 13,
@@ -19,55 +19,42 @@ const subStyle: React.CSSProperties = {
 
 function AlertsPanel() {
   const { t } = useLanguage();
-  const [resolvedIdx, setResolvedIdx] = useState<Set<number>>(new Set());
-  const resolve = (idx: number) =>
-    setResolvedIdx((prev) => {
-      const next = new Set(prev);
-      next.add(idx);
-      return next;
-    });
+  const { alerts, resolve } = useAlerts();
+  const unresolved = alerts.filter((a) => !a.resolved);
+
   const colorFor = (s: string) =>
     s === "critical" ? "var(--crit-color)" : s === "warning" ? "var(--warn-color)" : "var(--co2-color)";
+
   return (
-    <div
-      style={{
-        background: "var(--bg-surface)",
-        border: "1px solid var(--border)",
-        borderRadius: 12,
-        padding: 20,
-      }}
-    >
+    <div style={{ background: "var(--bg-surface)", border: "1px solid var(--border)", borderRadius: 12, padding: 20 }}>
       <div style={headingStyle}>{t("alerts.activeTitle")}</div>
-      <div style={subStyle}>{t("alerts.unresolvedCount", { n: Math.max(0, mockData.alerts.length - resolvedIdx.size) })}</div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-        {mockData.alerts.map((a, i) => {
-          const idx = i + 1;
-          if (resolvedIdx.has(idx)) return null;
-          const message = t(`alert.${idx}.message`) as string;
-          const timestamp = t(`alert.${idx}.timestamp`) as string;
-          const action = t(`alert.${idx}.action`) as string;
-          return (
-            <div key={i} style={{ display: "flex", gap: 12 }}>
+      <div style={subStyle}>{t("alerts.unresolvedCount", { n: unresolved.length })}</div>
+      {unresolved.length === 0 ? (
+        <div style={{ fontSize: 12, color: "var(--text-meta)", padding: "10px 0" }}>No active alerts.</div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+          {unresolved.slice(0, 5).map((a) => (
+            <div key={a.id} style={{ display: "flex", gap: 12 }}>
               <div style={{ width: 6, height: 6, borderRadius: "50%", background: colorFor(a.severity), marginTop: 6, flexShrink: 0 }} />
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.45 }}>{message}</div>
+                <div style={{ fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.45 }}>{a.message}</div>
                 <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
                   <span style={{ fontSize: 10, color: "var(--text-faint)" }}>
-                    {timestamp} · {t("alerts.estWaste")}: {a.wasteKwhPerDay} kWh
+                    {a.zone} · {t("alerts.estWaste")}: {Number(a.waste_kwh_per_day ?? 0)} kWh
                   </span>
                   <button
                     type="button"
-                    onClick={() => resolve(idx)}
-                    style={{ fontSize: 12, color: "var(--accent)", textDecoration: "none", fontWeight: 600, background: "none", border: "none", padding: 0, cursor: "pointer", fontFamily: "inherit" }}
+                    onClick={() => resolve(a.id)}
+                    style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600, background: "none", border: "none", padding: 0, cursor: "pointer", fontFamily: "inherit" }}
                   >
-                    {action} →
+                    Resolve →
                   </button>
                 </div>
               </div>
             </div>
-          );
-        })}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -76,16 +63,6 @@ function priorityColor(p: string) {
   if (p === "high") return "var(--crit-color)";
   if (p === "medium") return "var(--warn-color)";
   return "var(--text-meta)";
-}
-
-function RecCardSkeleton() {
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-      <div className="eduwatt-skeleton" style={{ height: 16, width: "60%" }} />
-      <div className="eduwatt-skeleton" style={{ height: 12, width: "92%" }} />
-      <div className="eduwatt-skeleton" style={{ height: 12, width: "78%" }} />
-    </div>
-  );
 }
 
 function RefreshIcon() {
@@ -99,79 +76,49 @@ function RefreshIcon() {
 }
 
 function RecommendationsPanel() {
-  const { t, lang } = useLanguage();
-  const [recs, setRecs] = useState<Recommendation[]>(mockData.recommendations as Recommendation[]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [usedFallback, setUsedFallback] = useState(true);
+  const { t } = useLanguage();
+  const { profile, latest } = useSchoolData();
+  const { alerts } = useAlerts();
+  const { active, implemented, dismissed, loading, refreshing, error, refresh, setStatus } = useAiRecommendations();
 
-  const load = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const snapshot = {
-        schoolName: mockData.schoolName,
-        date: new Date().toISOString().slice(0, 10),
-        solarGeneratedKwh: mockData.kpis.solarGenerated.value,
-        gridConsumedKwh: mockData.kpis.gridConsumed.value,
-        co2AvoidedKg: mockData.kpis.co2Avoided.value,
-        activeAlerts: mockData.alerts,
-        zoneConsumption: mockData.zones,
-        hourlySolar: mockData.hourlySolar,
-      };
-      const result = await fetchAIRecommendations(snapshot);
-      setRecs(result);
-      setUsedFallback(false);
-    } catch (e: any) {
-      setError(e?.message || "AI recommendations unavailable");
-      setRecs(mockData.recommendations as Recommendation[]);
-      setUsedFallback(true);
-    } finally {
-      setLoading(false);
-    }
+  const handleRefresh = () => {
+    refresh(() => ({
+      schoolName: profile?.school_name ?? "School",
+      date: new Date().toISOString().slice(0, 10),
+      solarGeneratedKwh: Number(latest?.solar_generated_kwh ?? 0),
+      gridConsumedKwh: Number(latest?.grid_consumed_kwh ?? 0),
+      co2AvoidedKg: Number(latest?.solar_generated_kwh ?? 0) * 0.28,
+      activeAlerts: alerts.filter((a) => !a.resolved).map((a) => ({ severity: a.severity, zone: a.zone, message: a.message })),
+      zoneConsumption: [],
+      hourlySolar: [],
+    }));
   };
 
-  useEffect(() => {
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const localizedTitle = (r: Recommendation, i: number) =>
-    usedFallback ? (t(`rec.${i + 1}.title`) as string) : r.title;
-  const localizedDetail = (r: Recommendation, i: number) =>
-    usedFallback ? (t(`rec.${i + 1}.detail`) as string) : r.detail;
+  const statusText = refreshing
+    ? t("rec.statusGenerating")
+    : error
+      ? t("rec.statusCached")
+      : active.length
+        ? t("rec.statusLive")
+        : "Click refresh to generate recommendations";
 
   return (
-    <div
-      style={{
-        background: "var(--bg-rec)",
-        border: "1px solid var(--border-rec)",
-        borderRadius: 12,
-        padding: 20,
-      }}
-    >
+    <div style={{ background: "var(--bg-rec)", border: "1px solid var(--border-rec)", borderRadius: 12, padding: 20 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
         <div>
           <div style={headingStyle}>{t("rec.title")}</div>
-          <div style={subStyle}>{loading ? t("rec.statusGenerating") : error ? t("rec.statusCached") : t("rec.statusLive")}</div>
+          <div style={subStyle}>{statusText}</div>
         </div>
         <button
           type="button"
-          onClick={load}
-          disabled={loading}
+          onClick={handleRefresh}
+          disabled={refreshing}
           aria-label="Refresh recommendations"
           style={{
-            width: 28,
-            height: 28,
-            borderRadius: 999,
-            border: "1px solid var(--border)",
-            background: "var(--bg-surface)",
-            color: "var(--text-secondary)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: loading ? "wait" : "pointer",
-            opacity: loading ? 0.5 : 1,
+            width: 28, height: 28, borderRadius: 999,
+            border: "1px solid var(--border)", background: "var(--bg-surface)",
+            color: "var(--text-secondary)", display: "flex", alignItems: "center", justifyContent: "center",
+            cursor: refreshing ? "wait" : "pointer", opacity: refreshing ? 0.5 : 1,
           }}
         >
           <RefreshIcon />
@@ -184,72 +131,83 @@ function RecommendationsPanel() {
         </div>
       )}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        {loading
-          ? [0, 1, 2].map((i) => <RecCardSkeleton key={i} />)
-          : recs.map((r, i) => (
-              <div key={r.id || i} style={{ display: "flex", gap: 12 }}>
-                <div
-                  style={{
-                    width: 20,
-                    height: 20,
-                    background: "var(--rec-icon-bg)",
-                    border: "1px solid var(--rec-icon-border)",
-                    borderRadius: 4,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
-                    fontSize: 11,
-                    color: "var(--rec-icon-text)",
-                    fontWeight: 600,
-                  }}
-                >
-                  ◆
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
-                    <span
-                      style={{
-                        fontSize: 9,
-                        fontWeight: 600,
-                        color: priorityColor(r.priority),
-                        textTransform: "uppercase",
-                        letterSpacing: "0.4px",
-                      }}
-                    >
-                      {t(`rec.priority.${r.priority}`)}
-                    </span>
-                    <span style={{ fontSize: 9, color: "var(--text-meta)", textTransform: "uppercase", letterSpacing: "0.4px" }}>
-                      {r.category}
-                    </span>
-                    <span
-                      style={{
-                        marginLeft: "auto",
-                        fontSize: 9,
-                        fontWeight: 600,
-                        padding: "1px 6px",
-                        borderRadius: 4,
-                        border: "1px solid var(--border)",
-                        color: "var(--text-meta)",
-                      }}
-                    >
+      {loading && !active.length && !implemented.length ? (
+        <div style={{ fontSize: 12, color: "var(--text-meta)" }}>Loading…</div>
+      ) : active.length === 0 && implemented.length === 0 ? (
+        <div style={{ fontSize: 12, color: "var(--text-meta)", padding: "10px 0" }}>No recommendations yet.</div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          {active.map((r) => (
+            <div key={r.id} style={{ display: "flex", gap: 12 }}>
+              <div style={{ width: 20, height: 20, background: "var(--rec-icon-bg)", border: "1px solid var(--rec-icon-border)", borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: 11, color: "var(--rec-icon-text)", fontWeight: 600 }}>◆</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2, flexWrap: "wrap" }}>
+                  <span style={{ fontSize: 9, fontWeight: 600, color: priorityColor(r.priority), textTransform: "uppercase", letterSpacing: "0.4px" }}>
+                    {t(`rec.priority.${r.priority}`)}
+                  </span>
+                  {r.category && <span style={{ fontSize: 9, color: "var(--text-meta)", textTransform: "uppercase", letterSpacing: "0.4px" }}>{r.category}</span>}
+                  {r.effort && (
+                    <span style={{ marginLeft: "auto", fontSize: 9, fontWeight: 600, padding: "1px 6px", borderRadius: 4, border: "1px solid var(--border)", color: "var(--text-meta)" }}>
                       {r.effort}
                     </span>
-                  </div>
-                  <div style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 600, lineHeight: 1.35 }} key={`${lang}-t-${i}`}>
-                    {localizedTitle(r, i)}
-                  </div>
-                  <div style={{ fontSize: 12, color: "var(--rec-text)", lineHeight: 1.45, marginTop: 2 }}>
-                    {localizedDetail(r, i)}
-                  </div>
-                  <div style={{ fontSize: 11, color: "var(--accent)", marginTop: 4 }}>
-                    {t("rec.savesLine", { kwh: r.projectedSavingKwhPerDay, co2: r.projectedCo2KgPerMonth })}
-                  </div>
+                  )}
+                </div>
+                <div style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 600, lineHeight: 1.35 }}>{r.title}</div>
+                <div style={{ fontSize: 12, color: "var(--rec-text)", lineHeight: 1.45, marginTop: 2 }}>{r.description}</div>
+                <div style={{ fontSize: 11, color: "var(--accent)", marginTop: 4 }}>
+                  {t("rec.savesLine", { kwh: Number(r.projected_saving_kwh_per_day ?? 0), co2: Number(r.projected_co2_kg_per_month ?? 0) })}
+                </div>
+                <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                  <button
+                    onClick={() => setStatus(r.id, "implemented")}
+                    style={{ fontSize: 11, fontWeight: 600, padding: "4px 10px", borderRadius: 6, border: "1px solid var(--accent)", background: "transparent", color: "var(--accent)", cursor: "pointer", fontFamily: "inherit" }}
+                  >
+                    Mark as Implemented
+                  </button>
+                  <button
+                    onClick={() => setStatus(r.id, "dismissed")}
+                    style={{ fontSize: 11, fontWeight: 600, padding: "4px 10px", borderRadius: 6, border: "1px solid var(--border)", background: "transparent", color: "var(--text-meta)", cursor: "pointer", fontFamily: "inherit" }}
+                  >
+                    Dismiss
+                  </button>
                 </div>
               </div>
-            ))}
-      </div>
+            </div>
+          ))}
+
+          {implemented.length > 0 && (
+            <div style={{ marginTop: 8, paddingTop: 16, borderTop: "1px solid var(--border-soft)" }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.4px", marginBottom: 10 }}>
+                Implemented ({implemented.length})
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {implemented.slice(0, 5).map((r) => (
+                  <div key={r.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 12, color: "var(--text-secondary)", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        ✓ {r.title}
+                      </div>
+                      <div style={{ fontSize: 10, color: "var(--text-faint)" }}>
+                        {r.implemented_at ? new Date(r.implemented_at).toLocaleDateString() : ""}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setStatus(r.id, "active")}
+                      style={{ fontSize: 10, color: "var(--text-meta)", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit" }}
+                    >
+                      Undo
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {dismissed.length > 0 && (
+            <div style={{ fontSize: 10, color: "var(--text-faint)" }}>{dismissed.length} dismissed</div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
