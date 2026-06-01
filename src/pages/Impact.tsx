@@ -1,5 +1,7 @@
 import Shell from "@/components/eduwatt/Shell";
 import { useLanguage } from "@/context/LanguageContext";
+import { useAiRecommendations } from "@/hooks/useAiRecommendations";
+import { useSchoolData } from "@/hooks/useSchoolData";
 
 const bannerStyle: React.CSSProperties = {
   background: "#0d1a0d",
