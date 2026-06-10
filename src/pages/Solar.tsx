@@ -16,7 +16,7 @@ const labelStyle: React.CSSProperties = {
   color: "var(--text-label)",
   letterSpacing: "0.5px",
   textTransform: "uppercase",
-  marginBottom: 14,
+  marginBottom: 10,
 };
 
 const valueStyle: React.CSSProperties = {
@@ -27,7 +27,23 @@ const valueStyle: React.CSSProperties = {
   lineHeight: 1,
 };
 
-function Kpi({ label, value, unit }: { label: string; value: string | number; unit?: string }) {
+const subStyle: React.CSSProperties = {
+  fontSize: 11,
+  color: "var(--text-muted)",
+  marginTop: 8,
+};
+
+function Kpi({
+  label,
+  value,
+  unit,
+  subtitle,
+}: {
+  label: string;
+  value: string | number;
+  unit?: string;
+  subtitle?: string;
+}) {
   return (
     <div style={cardStyle}>
       <div style={labelStyle}>{label}</div>
@@ -35,6 +51,7 @@ function Kpi({ label, value, unit }: { label: string; value: string | number; un
         <span style={valueStyle}>{value}</span>
         {unit && <span style={{ fontSize: 12, color: "var(--text-muted)", marginLeft: 6 }}>{unit}</span>}
       </div>
+      {subtitle && <div style={subStyle}>{subtitle}</div>}
     </div>
   );
 }
@@ -70,6 +87,47 @@ function AreaChart({ data }: { data: { hour: string; kwh: number }[] }) {
   );
 }
 
+const groups = [
+  { name: "Group A", capacity: 7.5, today: 16.4, status: "Normal" },
+  { name: "Group B", capacity: 7.5, today: 15.9, status: "Normal" },
+  { name: "Group C", capacity: 7.5, today: 16.9, status: "Normal" },
+];
+
+function PanelGroupsTable() {
+  return (
+    <div style={cardStyle}>
+      <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 14 }}>PANEL GROUPS</div>
+      <div style={{ overflowX: "auto" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+          <thead>
+            <tr style={{ borderBottom: "1px solid var(--border)" }}>
+              <th style={{ textAlign: "left", padding: "8px 12px 8px 0", color: "var(--text-label)", fontWeight: 600, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.5px" }}>Group</th>
+              <th style={{ textAlign: "left", padding: "8px 12px", color: "var(--text-label)", fontWeight: 600, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.5px" }}>Capacity</th>
+              <th style={{ textAlign: "left", padding: "8px 12px", color: "var(--text-label)", fontWeight: 600, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.5px" }}>Today</th>
+              <th style={{ textAlign: "left", padding: "8px 12px", color: "var(--text-label)", fontWeight: 600, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.5px" }}>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {groups.map((g) => (
+              <tr key={g.name} style={{ borderBottom: "1px solid var(--border)" }}>
+                <td style={{ padding: "10px 12px 10px 0", color: "var(--text-primary)", fontWeight: 500 }}>{g.name}</td>
+                <td style={{ padding: "10px 12px", color: "var(--text-secondary)" }}>{g.capacity} kW</td>
+                <td style={{ padding: "10px 12px", color: "var(--text-secondary)" }}>{g.today} kWh</td>
+                <td style={{ padding: "10px 12px" }}>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 500, color: "var(--accent)", background: "var(--accent-soft-bg)", padding: "3px 10px", borderRadius: 999 }}>
+                    <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--accent)", display: "inline-block" }} />
+                    {g.status}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 export default function Solar() {
   const { data, isLive } = useSolarData();
   const { profile } = useSchoolData();
@@ -79,16 +137,20 @@ export default function Solar() {
   const installed = Number(profile?.solar_capacity_kw ?? 0) || 22.5;
   const peakKw = data.length ? Math.max(...data.map((d) => d.kwh)) : 0;
   const utilization = installed ? ((peakKw / installed) * 100).toFixed(1) : "0";
-  const monthly = (total * 30).toFixed(0);
+
+  const currentPoint = data.length ? data[data.length - 1] : null;
+  const currentOutput = currentPoint ? currentPoint.kwh.toFixed(1) : "—";
+  const specificYield = installed && total > 0 ? (total / installed).toFixed(2) : "0.00";
 
   return (
     <Shell title={t("topbar.title.solar") as string}>
-      <div style={{ fontSize: 11, color: "var(--text-meta)" }}>{isLive ? t("solar.live") : t("solar.estimated")}</div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
-        <Kpi label={t("solar.kpi.totalGenerated") as string} value={total.toFixed(1)} unit="kWh" />
-        <Kpi label={t("solar.kpi.peakHour") as string} value={`${peak.hour}:00`} unit={`${peak.kwh.toFixed(1)} kWh`} />
-        <Kpi label={t("solar.kpi.utilization") as string} value={`${utilization}`} unit={t("solar.kpi.utilizationUnit", { kw: installed }) as string} />
-        <Kpi label={t("solar.kpi.monthly") as string} value={monthly} unit="kWh" />
+      <div style={{ fontSize: 11, color: "var(--text-meta)", marginBottom: 12 }}>{isLive ? t("solar.live") : t("solar.estimated")}</div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 12, marginBottom: 12 }}>
+        <Kpi label="Current Output" value={currentOutput} unit="kW" subtitle="Live generation now" />
+        <Kpi label="Today’s Generation" value={total.toFixed(1)} unit="kWh" />
+        <Kpi label="Best Production Hour" value={`${peak.hour}:00`} unit={`${peak.kwh.toFixed(1)} kWh`} />
+        <Kpi label="Capacity Utilization" value={`${utilization}`} unit="%" subtitle="Based on configured capacity" />
+        <Kpi label="Specific Yield" value={specificYield} unit="kWh/kWp" subtitle="Today" />
       </div>
       {data.length > 0 ? (
         <AreaChart data={data} />
@@ -100,12 +162,7 @@ export default function Solar() {
           </div>
         </div>
       )}
-      <div style={cardStyle}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 14 }}>{t("solar.panelGroups")}</div>
-        <div style={{ fontSize: 12, color: "var(--text-meta)", padding: "10px 0" }}>
-          Configured capacity: <span style={{ color: "var(--text-secondary)", fontWeight: 600 }}>{installed} kW</span>
-        </div>
-      </div>
+      <PanelGroupsTable />
     </Shell>
   );
 }
