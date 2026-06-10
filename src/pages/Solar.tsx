@@ -146,11 +146,11 @@ export default function Solar() {
     <Shell title={t("topbar.title.solar") as string}>
       <div style={{ fontSize: 11, color: "var(--text-meta)", marginBottom: 12 }}>{isLive ? t("solar.live") : t("solar.estimated")}</div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 12, marginBottom: 12 }}>
-        <Kpi label="Current Output" value={currentOutput} unit="kW" subtitle="Live generation now" />
-        <Kpi label="Today’s Generation" value={total.toFixed(1)} unit="kWh" />
-        <Kpi label="Best Production Hour" value={`${peak.hour}:00`} unit={`${peak.kwh.toFixed(1)} kWh`} />
-        <Kpi label="Capacity Utilization" value={`${utilization}`} unit="%" subtitle="Based on configured capacity" />
-        <Kpi label="Specific Yield" value={specificYield} unit="kWh/kWp" subtitle="Today" />
+        <Kpi label={t("solar.kpi.currentOutput") as string} value={currentOutput} unit="kW" subtitle={t("solar.kpi.currentOutputSub") as string} />
+        <Kpi label={t("solar.kpi.totalGenerated") as string} value={total.toFixed(1)} unit="kWh" />
+        <Kpi label={t("solar.kpi.peakHour") as string} value={`${peak.hour}:00`} unit={`${peak.kwh.toFixed(1)} kWh`} />
+        <Kpi label={t("solar.kpi.utilization") as string} value={`${utilization}`} unit="%" subtitle={t("solar.kpi.utilizationSub") as string} />
+        <Kpi label={t("solar.kpi.specificYield") as string} value={specificYield} unit="kWh/kWp" subtitle={t("solar.kpi.specificYieldSub") as string} />
       </div>
       {data.length > 0 ? (
         <AreaChart data={data} />
