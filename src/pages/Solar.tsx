@@ -149,7 +149,7 @@ export default function Solar() {
         <Kpi label={t("solar.kpi.currentOutput") as string} value={currentOutput} unit="kW" subtitle={t("solar.kpi.currentOutputSub") as string} />
         <Kpi label={t("solar.kpi.totalGenerated") as string} value={total.toFixed(1)} unit="kWh" />
         <Kpi label={t("solar.kpi.peakHour") as string} value={`${peak.hour}:00`} unit={`${peak.kwh.toFixed(1)} kWh`} />
-        <Kpi label={t("solar.kpi.utilization") as string} value={`${utilization}`} unit="%" subtitle={t("solar.kpi.utilizationSub") as string} />
+        <Kpi label={t("solar.kpi.utilization") as string} value={utilization} unit={t("solar.kpi.utilizationUnit", { kw: installed }) as string} subtitle={t("solar.kpi.utilizationSub") as string} />
         <Kpi label={t("solar.kpi.specificYield") as string} value={specificYield} unit="kWh/kWp" subtitle={t("solar.kpi.specificYieldSub") as string} />
       </div>
       {data.length > 0 ? (
