@@ -448,6 +448,7 @@ interface Zone { id: string; name: string; current_kw: number; zone_type: string
 function ZoneCards() {
   const { user } = useAuth() as any;
   const [zones, setZones] = useState<Zone[]>([]);
+  const [offset, setOffset] = useState(0);
 
   useEffect(() => {
     if (!user) return;
@@ -455,14 +456,18 @@ function ZoneCards() {
       .then(({ data }) => setZones((data as Zone[]) ?? []));
   }, [user]);
 
-  // Fallback if no zones seeded
-  const display = zones.length ? zones.slice(0, 5) : [
+  const all = zones.length ? zones : [
     { id: "1", name: "Science Lab", current_kw: 19.7, zone_type: "normal" },
     { id: "2", name: "Canteen", current_kw: 24.1, zone_type: "thermal" },
     { id: "3", name: "Hallways", current_kw: 11.6, zone_type: "normal" },
     { id: "4", name: "Admin", current_kw: 8.2, zone_type: "normal" },
     { id: "5", name: "Classroom 1", current_kw: 7.8, zone_type: "normal" },
+    { id: "6", name: "Gym", current_kw: 14.3, zone_type: "normal" },
+    { id: "7", name: "Library", current_kw: 6.4, zone_type: "normal" },
   ];
+  const pageSize = 5;
+  const maxOffset = Math.max(0, all.length - pageSize);
+  const display = all.slice(offset, offset + pageSize);
 
   return (
     <div style={{ ...cardBox, padding: 22 }}>
@@ -471,15 +476,25 @@ function ZoneCards() {
           Consumption by Zone <span style={{ color: C.textFaint, fontWeight: 500, fontSize: 14 }}>(Today)</span>
         </h3>
         <div style={{ display: "flex", gap: 6 }}>
-          <button style={navBtn}><ChevronLeft size={14} /></button>
-          <button style={navBtn}><ChevronRight size={14} /></button>
+          <button
+            style={{ ...navBtn, opacity: offset === 0 ? 0.4 : 1 }}
+            onClick={() => setOffset((o) => Math.max(0, o - 1))}
+            disabled={offset === 0}
+            aria-label="Previous zones"
+          ><ChevronLeft size={14} /></button>
+          <button
+            style={{ ...navBtn, opacity: offset >= maxOffset ? 0.4 : 1 }}
+            onClick={() => setOffset((o) => Math.min(maxOffset, o + 1))}
+            disabled={offset >= maxOffset}
+            aria-label="Next zones"
+          ><ChevronRight size={14} /></button>
         </div>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12 }}>
         {display.map((z, i) => {
           const isHigh = z.current_kw > 22 || z.zone_type === "thermal" || z.zone_type === "waste";
           return (
-            <div key={z.id} style={{ border: `1px solid ${C.border}`, borderRadius: 12, padding: 14, background: "#fff", boxShadow: "0 1px 2px rgba(15,23,42,0.03)" }}>
+            <div key={z.id} style={{ border: `1px solid ${C.border}`, borderLeft: `4px solid ${isHigh ? C.orange : C.green}`, borderRadius: 12, padding: 14, background: "#fff", boxShadow: "0 1px 2px rgba(15,23,42,0.03)" }}>
               <div style={{ fontSize: 13, fontWeight: 600, color: C.text, marginBottom: 8 }}>{z.name}</div>
               <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
                 <span style={{ fontSize: 22, fontWeight: 700, color: C.text, letterSpacing: "-0.5px" }}>{Number(z.current_kw).toFixed(1)}</span>
@@ -494,7 +509,7 @@ function ZoneCards() {
               }}>
                 {isHigh ? "High" : "Normal"}
               </span>
-              <Sparkline color={isHigh ? C.orange : C.green} seed={i} />
+              <Sparkline color={isHigh ? C.orange : C.green} seed={i + offset} />
             </div>
           );
         })}
