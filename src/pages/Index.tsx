@@ -386,15 +386,21 @@ function ZoneCards() {
         {display.map((z, i) => {
           const isHigh = z.current_kw > 22 || z.zone_type === "thermal" || z.zone_type === "waste";
           return (
-            <div key={z.id} style={{ border: `1px solid ${C.border}`, borderRadius: 12, padding: 14, background: "#fff" }}>
-              <div style={{ fontSize: 12, color: C.textMuted, marginBottom: 8 }}>{z.name}</div>
+            <div key={z.id} style={{ border: `1px solid ${C.border}`, borderRadius: 12, padding: 14, background: "#fff", boxShadow: "0 1px 2px rgba(15,23,42,0.03)" }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: C.text, marginBottom: 8 }}>{z.name}</div>
               <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
                 <span style={{ fontSize: 22, fontWeight: 700, color: C.text, letterSpacing: "-0.5px" }}>{Number(z.current_kw).toFixed(1)}</span>
                 <span style={{ fontSize: 11, color: C.textMuted }}>kW</span>
               </div>
-              <div style={{ fontSize: 11, fontWeight: 600, color: isHigh ? C.orange : C.green, marginTop: 6 }}>
+              <span style={{
+                display: "inline-block", marginTop: 8,
+                fontSize: 10.5, fontWeight: 700, letterSpacing: "0.3px",
+                color: isHigh ? C.orange : C.green,
+                background: isHigh ? C.orangeSoft : C.greenSoft,
+                padding: "3px 8px", borderRadius: 999,
+              }}>
                 {isHigh ? "High" : "Normal"}
-              </div>
+              </span>
               <Sparkline color={isHigh ? C.orange : C.green} seed={i} />
             </div>
           );
