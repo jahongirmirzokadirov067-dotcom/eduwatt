@@ -181,25 +181,25 @@ function KpiCards() {
         label="Solar Generated" labelColor={C.textMuted}
         value={solar.toFixed(1)} unit="kWh"
         delta={`↑ ${saved.toLocaleString()} UZS saved`} deltaColor={C.green}
-        iconBg={C.greenSoft} icon={<SolarPanelIcon size={26} color={C.green} />}
+        iconBg={C.greenSoft} icon={<SunMedium size={26} color={C.green} strokeWidth={2.2} />}
       />
       <Kpi
         label="Grid Consumed" labelColor={C.textMuted}
         value={grid.toFixed(1)} unit="kWh"
         delta="↓ 4.1% vs yesterday" deltaColor={C.blue}
-        iconBg={C.blueSoft} icon={<GridTowerIcon size={26} color={C.blue} />}
+        iconBg={C.blueSoft} icon={<Zap size={26} color={C.blue} strokeWidth={2.2} />}
       />
       <Kpi
         label="CO₂ Avoided" labelColor={C.purple}
         value={co2.toFixed(1)} unit="kg"
         delta="↑ 8.2% vs yesterday" deltaColor={C.green}
-        iconBg={C.purpleSoft} icon={<LeafIcon size={24} color={C.purple} />}
+        iconBg={C.purpleSoft} icon={<Leaf size={24} color={C.purple} strokeWidth={2.2} />}
       />
       <Kpi
         label="Active Alerts" labelColor={C.orange}
         value={String(active)} unit=""
         delta={`${active} unresolved > 1h`} deltaColor={C.orange}
-        iconBg={C.orangeSoft} icon={<BellIcon size={24} color={C.orange} />}
+        iconBg={C.orangeSoft} icon={<LBell size={24} color={C.orange} strokeWidth={2.2} />}
       />
     </div>
   );
