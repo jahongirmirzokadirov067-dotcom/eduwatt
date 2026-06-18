@@ -385,9 +385,9 @@ function FlowNode({ label, value, sub, icon }: { label: string; value: string; s
 
 function FlowArrow({ color }: { color: string }) {
   return (
-    <svg width="64" height="14" viewBox="0 0 64 14" fill="none">
-      <path d="M2 7 H54" stroke={color} strokeWidth="2" strokeLinecap="round" />
-      <path d="M54 2 L62 7 L54 12" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    <svg width="84" height="16" viewBox="0 0 84 16" fill="none">
+      <path d="M4 8 H72" stroke={color} strokeWidth="3" strokeLinecap="round" />
+      <path d="M70 2 L80 8 L70 14" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none" />
     </svg>
   );
 }
