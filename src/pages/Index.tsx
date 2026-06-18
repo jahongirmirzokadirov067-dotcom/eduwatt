@@ -10,6 +10,11 @@ import { useAiRecommendations } from "@/hooks/useAiRecommendations";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/eduwatt-logo.jpg";
+import {
+  SunMedium, Zap, Leaf, Bell as LBell,
+  BatteryCharging, School as LSchool,
+  Calendar as LCalendar, Sun as LSun, Home as LHome, Activity as LActivity,
+} from "lucide-react";
 
 /* ============================== TOKENS ============================== */
 const C = {
@@ -176,25 +181,25 @@ function KpiCards() {
         label="Solar Generated" labelColor={C.textMuted}
         value={solar.toFixed(1)} unit="kWh"
         delta={`↑ ${saved.toLocaleString()} UZS saved`} deltaColor={C.green}
-        iconBg={C.greenSoft} icon={<SolarPanelIcon size={26} color={C.green} />}
+        iconBg={C.greenSoft} icon={<SunMedium size={26} color={C.green} strokeWidth={2.2} />}
       />
       <Kpi
         label="Grid Consumed" labelColor={C.textMuted}
         value={grid.toFixed(1)} unit="kWh"
         delta="↓ 4.1% vs yesterday" deltaColor={C.blue}
-        iconBg={C.blueSoft} icon={<GridTowerIcon size={26} color={C.blue} />}
+        iconBg={C.blueSoft} icon={<Zap size={26} color={C.blue} strokeWidth={2.2} />}
       />
       <Kpi
         label="CO₂ Avoided" labelColor={C.purple}
         value={co2.toFixed(1)} unit="kg"
         delta="↑ 8.2% vs yesterday" deltaColor={C.green}
-        iconBg={C.purpleSoft} icon={<LeafIcon size={24} color={C.purple} />}
+        iconBg={C.purpleSoft} icon={<Leaf size={24} color={C.purple} strokeWidth={2.2} />}
       />
       <Kpi
         label="Active Alerts" labelColor={C.orange}
         value={String(active)} unit=""
         delta={`${active} unresolved > 1h`} deltaColor={C.orange}
-        iconBg={C.orangeSoft} icon={<BellIcon size={24} color={C.orange} />}
+        iconBg={C.orangeSoft} icon={<LBell size={24} color={C.orange} strokeWidth={2.2} />}
       />
     </div>
   );
@@ -246,14 +251,29 @@ function EnergyFlow() {
         <span style={{ fontSize: 11, fontWeight: 600, color: C.green, background: C.greenSoft, padding: "3px 10px", borderRadius: 999 }}>Live</span>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr auto 1fr auto 1fr", alignItems: "center", gap: 8, paddingBlock: 14 }}>
-        <FlowNode label="SOLAR PANELS" value={`${solar.toFixed(1)} kWh`} icon={<SolarPanelIcon size={56} color={C.green} />} />
+      <div style={{ position: "relative", display: "grid", gridTemplateColumns: "1fr auto 1fr auto 1fr auto 1fr", alignItems: "center", gap: 8, paddingBlock: 14 }}>
+        <FlowNode label="SOLAR PANELS" value={`${solar.toFixed(1)} kWh`} icon={
+          <div style={{ position: "relative", width: 56, height: 56 }}>
+            <Zap size={56} color={C.green} strokeWidth={1.8} style={{ position: "absolute", inset: 0, opacity: 0.18 }} fill={C.green} />
+            <SunMedium size={56} color={C.green} strokeWidth={2} style={{ position: "relative" }} />
+          </div>
+        } />
         <FlowArrow color={C.green} />
-        <FlowNode label="BATTERY" value={`${battery.toFixed(1)} kWh`} sub="81%" icon={<BatteryIcon size={52} color={C.green} />} />
+        <FlowNode label="BATTERY" value={`${battery.toFixed(1)} kWh`} sub="81%" icon={<BatteryCharging size={52} color={C.green} strokeWidth={2} />} />
         <FlowArrow color={C.green} />
-        <FlowNode label="SCHOOL" value={`${grid.toFixed(1)} kWh`} icon={<SchoolIcon size={56} color={C.navy} />} />
+        <FlowNode label="SCHOOL" value={`${grid.toFixed(1)} kWh`} icon={<LSchool size={56} color={C.navy} strokeWidth={1.8} />} />
         <FlowArrow color={C.blue} />
         <FlowNode label="GRID" value={`${gridExport.toFixed(1)} kWh`} icon={<GridTowerIcon size={54} color={C.navy} />} />
+
+        {/* Battery loop connector */}
+        <svg
+          aria-hidden
+          width="100%" height="40" viewBox="0 0 600 40" preserveAspectRatio="none"
+          style={{ gridColumn: "1 / -1", marginTop: -6 }}
+        >
+          <path d="M 220 4 C 220 30, 320 30, 320 4" stroke={C.green} strokeWidth="1.6" fill="none" strokeDasharray="4 4" opacity="0.6" />
+          <path d="M 318 4 L 322 4 L 320 8 Z" fill={C.green} opacity="0.6" />
+        </svg>
       </div>
     </div>
   );
@@ -261,11 +281,11 @@ function EnergyFlow() {
 
 function FlowNode({ label, value, sub, icon }: { label: string; value: string; sub?: string; icon: React.ReactNode }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
       <div style={{ fontSize: 10, fontWeight: 700, color: C.textMuted, letterSpacing: "1px" }}>{label}</div>
       <div style={{ height: 70, display: "grid", placeItems: "center" }}>{icon}</div>
-      {sub && <div style={{ fontSize: 14, fontWeight: 700, color: C.text }}>{sub}</div>}
-      <div style={{ fontSize: 13, color: C.textMuted }}>{value}</div>
+      {sub && <div style={{ fontSize: 20, fontWeight: 700, color: C.text, letterSpacing: "-0.5px" }}>{sub}</div>}
+      <div style={{ fontSize: 13, fontWeight: sub ? 500 : 600, color: sub ? C.textMuted : C.text }}>{value}</div>
     </div>
   );
 }
@@ -293,9 +313,9 @@ function TodaySummary() {
   return (
     <div style={{ ...cardBox, padding: 22 }}>
       <h3 style={{ margin: 0, marginBottom: 18, fontSize: 17, fontWeight: 700, color: C.text }}>Today's Summary</h3>
-      <SummaryRow icon={<ClipboardIcon size={18} color={C.textMuted} />} label="Total Consumption" value={`${grid.toFixed(1)} kWh`} />
+      <SummaryRow icon={<LCalendar size={18} color={C.textMuted} strokeWidth={2} />} label="Total Consumption" value={`${grid.toFixed(1)} kWh`} />
       <SummaryRow
-        icon={<SunSmallIcon size={18} color={C.textMuted} />}
+        icon={<LSun size={18} color={C.textMuted} strokeWidth={2} />}
         label="Solar Contribution"
         value={`${solarPct}%`}
         extra={
@@ -304,9 +324,9 @@ function TodaySummary() {
           </div>
         }
       />
-      <SummaryRow icon={<HomeSmallIcon size={18} color={C.textMuted} />} label="Energy Cost Saved" value={`${saved.toLocaleString()} UZS`} />
+      <SummaryRow icon={<LHome size={18} color={C.textMuted} strokeWidth={2} />} label="Energy Cost Saved" value={`${saved.toLocaleString()} UZS`} />
       <SummaryRow
-        icon={<PulseIcon size={18} color={C.textMuted} />}
+        icon={<LActivity size={18} color={C.textMuted} strokeWidth={2} />}
         label="Peak Demand"
         value={`${peak} kW`}
         extra={<div style={{ fontSize: 11, color: C.textFaint, marginTop: 2 }}>13:00 - 14:00</div>}
@@ -366,15 +386,21 @@ function ZoneCards() {
         {display.map((z, i) => {
           const isHigh = z.current_kw > 22 || z.zone_type === "thermal" || z.zone_type === "waste";
           return (
-            <div key={z.id} style={{ border: `1px solid ${C.border}`, borderRadius: 12, padding: 14, background: "#fff" }}>
-              <div style={{ fontSize: 12, color: C.textMuted, marginBottom: 8 }}>{z.name}</div>
+            <div key={z.id} style={{ border: `1px solid ${C.border}`, borderRadius: 12, padding: 14, background: "#fff", boxShadow: "0 1px 2px rgba(15,23,42,0.03)" }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: C.text, marginBottom: 8 }}>{z.name}</div>
               <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
                 <span style={{ fontSize: 22, fontWeight: 700, color: C.text, letterSpacing: "-0.5px" }}>{Number(z.current_kw).toFixed(1)}</span>
                 <span style={{ fontSize: 11, color: C.textMuted }}>kW</span>
               </div>
-              <div style={{ fontSize: 11, fontWeight: 600, color: isHigh ? C.orange : C.green, marginTop: 6 }}>
+              <span style={{
+                display: "inline-block", marginTop: 8,
+                fontSize: 10.5, fontWeight: 700, letterSpacing: "0.3px",
+                color: isHigh ? C.orange : C.green,
+                background: isHigh ? C.orangeSoft : C.greenSoft,
+                padding: "3px 8px", borderRadius: 999,
+              }}>
                 {isHigh ? "High" : "Normal"}
-              </div>
+              </span>
               <Sparkline color={isHigh ? C.orange : C.green} seed={i} />
             </div>
           );
