@@ -122,33 +122,71 @@ function LightSidebar() {
 /* ============================== TOPBAR ============================== */
 function Topbar({ schoolName }: { schoolName: string }) {
   const { user, signOut } = useAuth() as any;
+  const navigate = useNavigate();
+  const { alerts } = useAlerts();
+  const unread = alerts.filter((a) => !a.resolved).length;
   const initials = (user?.email ?? "D U").slice(0, 2).toUpperCase();
   const [now, setNow] = useState(() => new Date());
+  const [schoolOpen, setSchoolOpen] = useState(false);
+  const [school, setSchool] = useState(schoolName);
+  useEffect(() => setSchool(schoolName), [schoolName]);
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 30_000);
     return () => clearInterval(id);
   }, []);
   const time = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
+  const schools = Array.from(new Set([school, "School No 46", "School No 12", "School No 88"]));
 
   return (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "22px 28px 4px" }}>
+      <style>{`
+        @keyframes ew-pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .35; transform: scale(.85); } }
+        .ew-live-dot { animation: ew-pulse 1.4s ease-in-out infinite; }
+      `}</style>
       <div>
         <h1 style={{ fontSize: 26, fontWeight: 700, color: C.text, margin: 0, letterSpacing: "-0.5px" }}>Overview Dashboard</h1>
         <div style={{ fontSize: 13, color: C.textMuted, marginTop: 4 }}>Real-time overview of your school's energy performance</div>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-        <div style={pill}>
-          <span>{schoolName}</span>
-          <ChevronDown size={14} />
+        <div style={{ position: "relative" }}>
+          <button onClick={() => setSchoolOpen((o) => !o)} style={{ ...pill, cursor: "pointer" }}>
+            <span>{school}</span>
+            <ChevronDown size={14} />
+          </button>
+          {schoolOpen && (
+            <div style={{
+              position: "absolute", top: 44, right: 0, background: "#fff",
+              border: `1px solid ${C.border}`, borderRadius: 10, minWidth: 180,
+              boxShadow: "0 8px 24px rgba(15,23,42,0.12)", zIndex: 50, overflow: "hidden",
+            }}>
+              {schools.map((s) => (
+                <button
+                  key={s}
+                  onClick={() => { setSchool(s); setSchoolOpen(false); }}
+                  style={{
+                    display: "block", width: "100%", textAlign: "left",
+                    padding: "10px 14px", fontSize: 13, color: C.text,
+                    background: s === school ? C.greenTint : "#fff", border: "none", cursor: "pointer",
+                  }}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 600, color: C.text }}>
-          <span style={{ width: 8, height: 8, borderRadius: 999, background: C.green, boxShadow: `0 0 0 4px ${C.greenSoft}` }} />
+        <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 700, color: C.text }}>
+          <span className="ew-live-dot" style={{ width: 8, height: 8, borderRadius: 999, background: C.green, boxShadow: `0 0 0 4px ${C.greenSoft}` }} />
           LIVE
         </div>
         <div style={{ fontSize: 13, color: C.textMuted, fontVariantNumeric: "tabular-nums" }}>{time}</div>
-        <button aria-label="Notifications" style={iconBtn}>
+        <button aria-label="Notifications" onClick={() => navigate("/alerts")} style={iconBtn}>
           <BellIcon size={16} />
-          <span style={{ position: "absolute", top: 6, right: 6, width: 8, height: 8, borderRadius: 999, background: C.orange, border: "2px solid #fff" }} />
+          {unread > 0 && (
+            <span style={{ position: "absolute", top: 4, right: 4, minWidth: 16, height: 16, padding: "0 4px", borderRadius: 999, background: C.red, color: "#fff", fontSize: 10, fontWeight: 700, display: "grid", placeItems: "center", border: "2px solid #fff" }}>
+              {unread}
+            </span>
+          )}
         </button>
         <button
           onClick={() => signOut?.()}
@@ -192,52 +230,59 @@ function KpiCards() {
   return (
     <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
       <Kpi
-        label="Solar Generated" labelColor={C.textMuted}
+        label="Solar Generated" labelColor={C.textMuted} accent={C.green}
         value={solar.toFixed(1)} unit="kWh"
         delta={`↑ ${saved.toLocaleString()} UZS saved`} deltaColor={C.green}
-        iconBg={C.greenSoft} icon={<SunMedium size={26} color={C.green} strokeWidth={2.2} />}
+        iconBg={C.greenSoft} icon={<KpiSolarIcon />}
       />
       <Kpi
-        label="Grid Consumed" labelColor={C.textMuted}
+        label="Grid Consumed" labelColor={C.textMuted} accent={C.blue}
         value={grid.toFixed(1)} unit="kWh"
         delta="↓ 4.1% vs yesterday" deltaColor={C.blue}
-        iconBg={C.blueSoft} icon={<Zap size={26} color={C.blue} strokeWidth={2.2} />}
+        iconBg={C.blueSoft} icon={<KpiGridIcon />}
       />
       <Kpi
-        label="CO₂ Avoided" labelColor={C.purple}
+        label="CO₂ Avoided" labelColor={C.purple} accent={C.purple}
         value={co2.toFixed(1)} unit="kg"
         delta="↑ 8.2% vs yesterday" deltaColor={C.green}
-        iconBg={C.purpleSoft} icon={<Leaf size={24} color={C.purple} strokeWidth={2.2} />}
+        iconBg={C.purpleSoft} icon={<KpiLeafIcon />}
       />
       <Kpi
-        label="Active Alerts" labelColor={C.orange}
+        label="Active Alerts" labelColor={C.orange} accent={C.orange}
         value={String(active)} unit=""
-        delta={`${active} unresolved > 1h`} deltaColor={C.orange}
-        iconBg={C.orangeSoft} icon={<LBell size={24} color={C.orange} strokeWidth={2.2} />}
+        delta={`${active} unresolved`} deltaColor={C.orange}
+        iconBg={C.orangeSoft} icon={<KpiBellIcon />} notify
       />
     </div>
   );
 }
 
 function Kpi({
-  label, labelColor, value, unit, delta, deltaColor, iconBg, icon,
+  label, labelColor, accent, value, unit, delta, deltaColor, iconBg, icon, notify,
 }: {
-  label: string; labelColor: string; value: string; unit: string;
-  delta: string; deltaColor: string; iconBg: string; icon: React.ReactNode;
+  label: string; labelColor: string; accent: string; value: string; unit: string;
+  delta: string; deltaColor: string; iconBg: string; icon: React.ReactNode; notify?: boolean;
 }) {
   return (
-    <div style={cardBox}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: labelColor, marginBottom: 14 }}>{label}</div>
+    <div style={{
+      background: C.card, border: `1px solid ${C.border}`,
+      borderLeft: `4px solid ${accent}`,
+      borderRadius: 16, padding: 24, boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+    }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: labelColor, marginBottom: 14, letterSpacing: "0.6px", textTransform: "uppercase" }}>{label}</div>
           <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-            <span style={{ fontSize: 32, fontWeight: 700, color: C.text, letterSpacing: "-1px", lineHeight: 1 }}>{value}</span>
+            <span style={{ fontSize: 36, fontWeight: 700, color: C.text, letterSpacing: "-1.2px", lineHeight: 1 }}>{value}</span>
             {unit && <span style={{ fontSize: 13, color: C.textMuted }}>{unit}</span>}
           </div>
-          <div style={{ fontSize: 12, color: deltaColor, marginTop: 14, fontWeight: 500 }}>{delta}</div>
+          <div style={{ fontSize: 12, color: deltaColor, marginTop: 14, fontWeight: 600 }}>{delta}</div>
         </div>
-        <div style={{ width: 52, height: 52, borderRadius: 999, background: iconBg, display: "grid", placeItems: "center" }}>
+        <div style={{ position: "relative", width: 64, height: 64, borderRadius: 999, background: iconBg, display: "grid", placeItems: "center", flexShrink: 0 }}>
           {icon}
+          {notify && (
+            <span style={{ position: "absolute", top: 2, right: 2, width: 12, height: 12, borderRadius: 999, background: C.red, border: "2px solid #fff" }} />
+          )}
         </div>
       </div>
     </div>
@@ -246,8 +291,56 @@ function Kpi({
 
 const cardBox: React.CSSProperties = {
   background: C.card, border: `1px solid ${C.border}`,
-  borderRadius: 14, padding: 20, boxShadow: "0 1px 2px rgba(15,23,42,0.03)",
+  borderRadius: 16, padding: 20, boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
 };
+
+/* ============================== KPI ICON ILLUSTRATIONS ============================== */
+function KpiSolarIcon() {
+  return (
+    <svg width="36" height="36" viewBox="0 0 48 48" fill="none">
+      {/* sun above-right */}
+      <circle cx="38" cy="10" r="4" fill="#facc15" />
+      <g stroke="#facc15" strokeWidth="1.6" strokeLinecap="round">
+        <path d="M38 2v3M38 15v3M30 10h3M43 10h3M32.5 4.5l2 2M41.5 13.5l2 2M32.5 15.5l2-2M41.5 6.5l2-2"/>
+      </g>
+      {/* panel */}
+      <path d="M6 18l30 0 6 18-30 0z" fill={C.green} fillOpacity="0.18" stroke={C.green} strokeWidth="2" strokeLinejoin="round"/>
+      <path d="M16 18l-3 18M26 18l-1 18M36 18l1 18M10 24l30 0M8 30l32 0" stroke={C.green} strokeWidth="1.6" strokeLinecap="round"/>
+    </svg>
+  );
+}
+function KpiGridIcon() {
+  return (
+    <svg width="36" height="36" viewBox="0 0 48 48" fill="none" stroke={C.blue} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 4l-4 38M30 4l4 38M18 4h12"/>
+      <path d="M20 14h8M17 26h14M14 38h20"/>
+      <path d="M20 14l10 24M28 14L18 38"/>
+      <circle cx="14" cy="44" r="1.4" fill={C.blue} stroke="none"/>
+      <circle cx="24" cy="44" r="1.4" fill={C.blue} stroke="none"/>
+      <circle cx="34" cy="44" r="1.4" fill={C.blue} stroke="none"/>
+    </svg>
+  );
+}
+function KpiLeafIcon() {
+  return (
+    <svg width="36" height="36" viewBox="0 0 48 48" fill="none">
+      <path d="M40 8c-18 0-28 10-28 22a10 10 0 0010 10c14 0 22-14 22-32z"
+        fill={C.purple} fillOpacity="0.18" stroke={C.purple} strokeWidth="2.2" strokeLinejoin="round"/>
+      <path d="M14 40c8-14 16-22 26-24" stroke={C.purple} strokeWidth="2" strokeLinecap="round" fill="none"/>
+      <text x="24" y="46" textAnchor="middle" fontSize="6" fontWeight="700" fill={C.purple}>CO₂</text>
+    </svg>
+  );
+}
+function KpiBellIcon() {
+  return (
+    <svg width="36" height="36" viewBox="0 0 48 48" fill="none" stroke={C.orange} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="24" cy="6" r="1.6" fill={C.orange} stroke="none"/>
+      <path d="M10 34c0-2 4-3 4-12a10 10 0 1120 0c0 9 4 10 4 12z" fill={C.orange} fillOpacity="0.18"/>
+      <path d="M10 34h28"/>
+      <path d="M20 39a4 4 0 008 0" />
+    </svg>
+  );
+}
 
 /* ============================== ENERGY FLOW ============================== */
 function EnergyFlow() {
@@ -262,32 +355,17 @@ function EnergyFlow() {
     <div style={{ ...cardBox, padding: "22px 24px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18 }}>
         <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: C.text }}>Energy Flow</h3>
-        <span style={{ fontSize: 11, fontWeight: 600, color: C.green, background: C.greenSoft, padding: "3px 10px", borderRadius: 999 }}>Live</span>
+        <span style={{ fontSize: 11, fontWeight: 700, color: C.green, background: C.greenSoft, padding: "3px 10px", borderRadius: 999 }}>LIVE</span>
       </div>
 
       <div style={{ position: "relative", display: "grid", gridTemplateColumns: "1fr auto 1fr auto 1fr auto 1fr", alignItems: "center", gap: 8, paddingBlock: 14 }}>
-        <FlowNode label="SOLAR PANELS" value={`${solar.toFixed(1)} kWh`} icon={
-          <div style={{ position: "relative", width: 56, height: 56 }}>
-            <Zap size={56} color={C.green} strokeWidth={1.8} style={{ position: "absolute", inset: 0, opacity: 0.18 }} fill={C.green} />
-            <SunMedium size={56} color={C.green} strokeWidth={2} style={{ position: "relative" }} />
-          </div>
-        } />
+        <FlowNode label="SOLAR PANELS" value={`${solar.toFixed(1)} kWh`} icon={<SolarPanelIcon size={56} color={C.green} />} />
         <FlowArrow color={C.green} />
-        <FlowNode label="BATTERY" value={`${battery.toFixed(1)} kWh`} sub="81%" icon={<BatteryCharging size={52} color={C.green} strokeWidth={2} />} />
+        <FlowNode label="BATTERY" value={`${battery.toFixed(1)} kWh`} sub="81%" icon={<BatteryIcon size={56} color={C.green} />} />
         <FlowArrow color={C.green} />
-        <FlowNode label="SCHOOL" value={`${grid.toFixed(1)} kWh`} icon={<LSchool size={56} color={C.navy} strokeWidth={1.8} />} />
+        <FlowNode label="SCHOOL" value={`${grid.toFixed(1)} kWh`} icon={<SchoolIcon size={56} color={C.navy} />} />
         <FlowArrow color={C.blue} />
-        <FlowNode label="GRID" value={`${gridExport.toFixed(1)} kWh`} icon={<GridTowerIcon size={54} color={C.navy} />} />
-
-        {/* Battery loop connector */}
-        <svg
-          aria-hidden
-          width="100%" height="40" viewBox="0 0 600 40" preserveAspectRatio="none"
-          style={{ gridColumn: "1 / -1", marginTop: -6 }}
-        >
-          <path d="M 220 4 C 220 30, 320 30, 320 4" stroke={C.green} strokeWidth="1.6" fill="none" strokeDasharray="4 4" opacity="0.6" />
-          <path d="M 318 4 L 322 4 L 320 8 Z" fill={C.green} opacity="0.6" />
-        </svg>
+        <FlowNode label="GRID" value={`${gridExport.toFixed(1)} kWh`} icon={<GridTowerIcon size={56} color={C.blue} />} />
       </div>
     </div>
   );
@@ -298,6 +376,7 @@ function FlowNode({ label, value, sub, icon }: { label: string; value: string; s
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
       <div style={{ fontSize: 10, fontWeight: 700, color: C.textMuted, letterSpacing: "1px" }}>{label}</div>
       <div style={{ height: 70, display: "grid", placeItems: "center" }}>{icon}</div>
+
       {sub && <div style={{ fontSize: 20, fontWeight: 700, color: C.text, letterSpacing: "-0.5px" }}>{sub}</div>}
       <div style={{ fontSize: 13, fontWeight: sub ? 500 : 600, color: sub ? C.textMuted : C.text }}>{value}</div>
     </div>
