@@ -313,9 +313,9 @@ function TodaySummary() {
   return (
     <div style={{ ...cardBox, padding: 22 }}>
       <h3 style={{ margin: 0, marginBottom: 18, fontSize: 17, fontWeight: 700, color: C.text }}>Today's Summary</h3>
-      <SummaryRow icon={<ClipboardIcon size={18} color={C.textMuted} />} label="Total Consumption" value={`${grid.toFixed(1)} kWh`} />
+      <SummaryRow icon={<LCalendar size={18} color={C.textMuted} strokeWidth={2} />} label="Total Consumption" value={`${grid.toFixed(1)} kWh`} />
       <SummaryRow
-        icon={<SunSmallIcon size={18} color={C.textMuted} />}
+        icon={<LSun size={18} color={C.textMuted} strokeWidth={2} />}
         label="Solar Contribution"
         value={`${solarPct}%`}
         extra={
@@ -324,9 +324,9 @@ function TodaySummary() {
           </div>
         }
       />
-      <SummaryRow icon={<HomeSmallIcon size={18} color={C.textMuted} />} label="Energy Cost Saved" value={`${saved.toLocaleString()} UZS`} />
+      <SummaryRow icon={<LHome size={18} color={C.textMuted} strokeWidth={2} />} label="Energy Cost Saved" value={`${saved.toLocaleString()} UZS`} />
       <SummaryRow
-        icon={<PulseIcon size={18} color={C.textMuted} />}
+        icon={<LActivity size={18} color={C.textMuted} strokeWidth={2} />}
         label="Peak Demand"
         value={`${peak} kW`}
         extra={<div style={{ fontSize: 11, color: C.textFaint, marginTop: 2 }}>13:00 - 14:00</div>}
