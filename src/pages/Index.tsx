@@ -251,14 +251,29 @@ function EnergyFlow() {
         <span style={{ fontSize: 11, fontWeight: 600, color: C.green, background: C.greenSoft, padding: "3px 10px", borderRadius: 999 }}>Live</span>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr auto 1fr auto 1fr", alignItems: "center", gap: 8, paddingBlock: 14 }}>
-        <FlowNode label="SOLAR PANELS" value={`${solar.toFixed(1)} kWh`} icon={<SolarPanelIcon size={56} color={C.green} />} />
+      <div style={{ position: "relative", display: "grid", gridTemplateColumns: "1fr auto 1fr auto 1fr auto 1fr", alignItems: "center", gap: 8, paddingBlock: 14 }}>
+        <FlowNode label="SOLAR PANELS" value={`${solar.toFixed(1)} kWh`} icon={
+          <div style={{ position: "relative", width: 56, height: 56 }}>
+            <Zap size={56} color={C.green} strokeWidth={1.8} style={{ position: "absolute", inset: 0, opacity: 0.18 }} fill={C.green} />
+            <SunMedium size={56} color={C.green} strokeWidth={2} style={{ position: "relative" }} />
+          </div>
+        } />
         <FlowArrow color={C.green} />
-        <FlowNode label="BATTERY" value={`${battery.toFixed(1)} kWh`} sub="81%" icon={<BatteryIcon size={52} color={C.green} />} />
+        <FlowNode label="BATTERY" value={`${battery.toFixed(1)} kWh`} sub="81%" icon={<BatteryCharging size={52} color={C.green} strokeWidth={2} />} />
         <FlowArrow color={C.green} />
-        <FlowNode label="SCHOOL" value={`${grid.toFixed(1)} kWh`} icon={<SchoolIcon size={56} color={C.navy} />} />
+        <FlowNode label="SCHOOL" value={`${grid.toFixed(1)} kWh`} icon={<LSchool size={56} color={C.navy} strokeWidth={1.8} />} />
         <FlowArrow color={C.blue} />
         <FlowNode label="GRID" value={`${gridExport.toFixed(1)} kWh`} icon={<GridTowerIcon size={54} color={C.navy} />} />
+
+        {/* Battery loop connector */}
+        <svg
+          aria-hidden
+          width="100%" height="40" viewBox="0 0 600 40" preserveAspectRatio="none"
+          style={{ gridColumn: "1 / -1", marginTop: -6 }}
+        >
+          <path d="M 220 4 C 220 30, 320 30, 320 4" stroke={C.green} strokeWidth="1.6" fill="none" strokeDasharray="4 4" opacity="0.6" />
+          <path d="M 318 4 L 322 4 L 320 8 Z" fill={C.green} opacity="0.6" />
+        </svg>
       </div>
     </div>
   );
