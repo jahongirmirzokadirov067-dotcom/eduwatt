@@ -559,7 +559,7 @@ function AiRecCard() {
       </div>
 
       <button
-        onClick={() => navigate("/alerts")}
+        onClick={() => navigate("/reports")}
         style={{ alignSelf: "flex-start", marginTop: 10, fontSize: 13, fontWeight: 600, color: C.green, background: "none", border: "none", padding: 0, cursor: "pointer" }}
       >
         View Details →
