@@ -281,11 +281,11 @@ function EnergyFlow() {
 
 function FlowNode({ label, value, sub, icon }: { label: string; value: string; sub?: string; icon: React.ReactNode }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
       <div style={{ fontSize: 10, fontWeight: 700, color: C.textMuted, letterSpacing: "1px" }}>{label}</div>
       <div style={{ height: 70, display: "grid", placeItems: "center" }}>{icon}</div>
-      {sub && <div style={{ fontSize: 14, fontWeight: 700, color: C.text }}>{sub}</div>}
-      <div style={{ fontSize: 13, color: C.textMuted }}>{value}</div>
+      {sub && <div style={{ fontSize: 20, fontWeight: 700, color: C.text, letterSpacing: "-0.5px" }}>{sub}</div>}
+      <div style={{ fontSize: 13, fontWeight: sub ? 500 : 600, color: sub ? C.textMuted : C.text }}>{value}</div>
     </div>
   );
 }
