@@ -10,6 +10,11 @@ import { useAiRecommendations } from "@/hooks/useAiRecommendations";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/eduwatt-logo.jpg";
+import {
+  SunMedium, Zap, Leaf, Bell as LBell,
+  BatteryCharging, School as LSchool,
+  Calendar as LCalendar, Sun as LSun, Home as LHome, Activity as LActivity,
+} from "lucide-react";
 
 /* ============================== TOKENS ============================== */
 const C = {
