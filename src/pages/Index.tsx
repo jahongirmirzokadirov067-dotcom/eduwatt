@@ -16,24 +16,25 @@ import {
 
 /* ============================== TOKENS ============================== */
 const C = {
-  page: "#f4f6fa",
+  page: "#f8fafc",
   card: "#ffffff",
-  border: "#e6e9ef",
+  border: "#e5e7eb",
   borderSoft: "#eef0f5",
-  text: "#0f172a",
-  textMuted: "#64748b",
+  text: "#111827",
+  textMuted: "#6b7280",
   textFaint: "#94a3b8",
-  navy: "#0b1736",
+  navy: "#0f172a",
   navyDeep: "#070f24",
   green: "#16a34a",
-  greenSoft: "#e8f6ee",
-  greenTint: "#ecfaf1",
+  greenSoft: "#dcfce7",
+  greenTint: "#f0fdf4",
   blue: "#2563eb",
-  blueSoft: "#e6efff",
-  purple: "#7c3aed",
-  purpleSoft: "#f1ebff",
-  orange: "#ea7a17",
-  orangeSoft: "#fdf0e1",
+  blueSoft: "#dbeafe",
+  purple: "#9333ea",
+  purpleSoft: "#f3e8ff",
+  orange: "#f97316",
+  orangeSoft: "#ffedd5",
+  red: "#dc2626",
 };
 
 /* ============================== SIDEBAR ============================== */
