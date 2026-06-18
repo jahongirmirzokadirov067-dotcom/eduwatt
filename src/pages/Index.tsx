@@ -38,12 +38,24 @@ const C = {
 };
 
 /* ============================== SIDEBAR ============================== */
+function AlertBadge() {
+  const { alerts } = useAlerts();
+  const n = alerts.filter((a) => !a.resolved).length;
+  if (!n) return null;
+  return (
+    <span style={{
+      marginLeft: "auto", background: C.red, color: "#fff",
+      fontSize: 10, fontWeight: 700, padding: "1px 6px", borderRadius: 999, minWidth: 18, textAlign: "center",
+    }}>{n}</span>
+  );
+}
+
 const NAV = [
   { to: "/", label: "Overview", icon: HomeIcon, end: true },
   { to: "/solar", label: "Solar panels", icon: SunIcon },
   { to: "/grid", label: "Grid", icon: GridTowerIcon },
   { to: "/zones", label: "Zones", icon: LayersIcon },
-  { to: "/alerts", label: "Alerts", icon: BellIcon },
+  { to: "/alerts", label: "Alerts", icon: BellIcon, badge: true },
   { to: "/reports", label: "Reports", icon: DocIcon },
   { to: "/data-input", label: "Data input", icon: TableIcon },
   { to: "/impact", label: "National impact", icon: GlobeIcon },
@@ -91,12 +103,15 @@ function LightSidebar() {
               textDecoration: "none",
               fontSize: 13.5,
               fontWeight: isActive ? 600 : 500,
-              color: isActive ? C.green : "#cfd6e6",
-              background: isActive ? "rgba(22,163,74,0.10)" : "transparent",
+              color: isActive ? "#fff" : "#cfd6e6",
+              background: isActive ? "#1e293b" : "transparent",
+              borderLeft: isActive ? `4px solid ${C.green}` : "4px solid transparent",
+              paddingLeft: isActive ? 8 : 12,
             })}
           >
             <it.icon size={17} />
             <span>{it.label}</span>
+            {it.badge && <AlertBadge />}
           </NavLink>
         ))}
       </nav>
