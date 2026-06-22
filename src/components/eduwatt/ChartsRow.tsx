@@ -93,8 +93,14 @@ function ZonesChart() {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from("zones").select("*").eq("user_id", user.id).order("created_at")
-      .then(({ data }) => setZones((data as Zone[]) ?? []));
+    const load = () => {
+      supabase.from("zones").select("*").eq("user_id", user.id).order("created_at")
+        .then(({ data }) => setZones((data as Zone[]) ?? []));
+    };
+    load();
+    const handler = () => load();
+    window.addEventListener("eduwatt:zones-updated", handler);
+    return () => window.removeEventListener("eduwatt:zones-updated", handler);
   }, [user]);
 
   const max = Math.max(...zones.map((z) => Number(z.current_kw) || 0), 0.001);
