@@ -248,5 +248,28 @@
   .eduwatt-sidebar-wrap.is-open {
     transform: translateX(0);
   }
+
+  /* Compact topbar on mobile */
+  .eduwatt-topbar {
+    height: auto !important;
+    min-height: 57px;
+    padding: 8px 12px !important;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .eduwatt-topbar h1 { font-size: 13px !important; }
+  .eduwatt-topbar-actions {
+    gap: 6px !important;
+    width: 100%;
+    justify-content: flex-start !important;
+    flex-wrap: wrap;
+  }
+  .eduwatt-topbar-actions button {
+    min-height: 32px;
+    padding: 4px 8px !important;
+    font-size: 11px !important;
+    border-radius: 8px !important;
+  }
 }
+
 

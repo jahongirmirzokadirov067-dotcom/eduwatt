@@ -53,6 +53,8 @@ export default function Zones() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
+  const notifyZones = () => window.dispatchEvent(new Event("eduwatt:zones-updated"));
+
   const addZone = async () => {
     if (!user || !newName.trim()) return;
     const { data, error } = await supabase
@@ -64,6 +66,7 @@ export default function Zones() {
     setZones((z) => [...z, data as Zone]);
     setNewName("");
     setNewType("normal");
+    notifyZones();
     toast.success("Zone added");
   };
 
@@ -74,12 +77,14 @@ export default function Zones() {
     setZones((arr) => arr.map((z) => (z.id === id ? { ...z, name: editingName.trim() } : z)));
     setEditingId(null);
     setEditingName("");
+    notifyZones();
   };
 
   const deleteZone = async (id: string) => {
     const { error } = await supabase.from("zones").delete().eq("id", id);
     if (error) return toast.error(error.message);
     setZones((arr) => arr.filter((z) => z.id !== id));
+    notifyZones();
   };
 
   const totalKw = zones.reduce((s, z) => s + Number(z.current_kw || 0), 0) || 1;
