@@ -12,6 +12,7 @@ export default function Topbar({ title, onMenuClick }: { title?: string; onMenuC
   const schoolName = profile?.school_name || "EduWatt School";
   return (
     <header
+      className="eduwatt-topbar"
       style={{
         height: 57,
         borderBottom: "1px solid var(--border)",
@@ -57,7 +58,7 @@ export default function Topbar({ title, onMenuClick }: { title?: string; onMenuC
           {displayTitle}
         </h1>
       </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+      <div className="eduwatt-topbar-actions" style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
         <div
           className="eduwatt-school-pill"
           style={{
