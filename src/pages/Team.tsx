@@ -26,21 +26,21 @@ const members: Member[] = [
   },
   {
     name: "Azizbek Ibrohimov",
-    role: "Business",
-    roleColor: "#60a5fa",
+    role: "UI / UX",
+    roleColor: "#c084fc",
     photo: azizbekIAsset.url,
     photoPosition: "center 18%",
     initials: "AI",
-    bio: "Drives partnerships, go-to-market, and stakeholder relations.",
+    bio: "Crafts the visual language and seamless user experience.",
   },
   {
     name: "Azizbek Toshpo'latov",
-    role: "UI / UX",
-    roleColor: "#c084fc",
+    role: "Business",
+    roleColor: "#60a5fa",
     photo: azizbekTAsset.url,
     photoPosition: "center 22%",
     initials: "AT",
-    bio: "Crafts the visual language and seamless user experience.",
+    bio: "Drives partnerships, go-to-market, and stakeholder relations.",
   },
 ];
 
@@ -93,11 +93,13 @@ function MemberCard({ m, i }: { m: Member; i: number }) {
       </div>
 
       <h3
+        className="ew-team-name"
         style={{
+          position: "relative",
+          zIndex: 2,
           fontSize: 18,
-          fontWeight: 600,
-          color: "var(--text-primary)",
-          margin: "20px 0 8px",
+          fontWeight: 700,
+          margin: "20px 0 10px",
           textAlign: "center",
           letterSpacing: "-0.3px",
         }}
@@ -105,24 +107,19 @@ function MemberCard({ m, i }: { m: Member; i: number }) {
         {m.name}
       </h3>
 
-      <div style={{ display: "flex", justifyContent: "center", marginBottom: 14 }}>
+      <div style={{ display: "flex", justifyContent: "center", marginBottom: 14, position: "relative", zIndex: 2 }}>
         <span
+          className="ew-team-role"
           style={{
-            display: "inline-block",
-            padding: "4px 12px",
-            borderRadius: 999,
-            fontSize: 11,
-            fontWeight: 600,
-            letterSpacing: "0.4px",
-            textTransform: "uppercase",
-            color: m.roleColor,
-            background: `color-mix(in srgb, ${m.roleColor} 14%, transparent)`,
-            border: `1px solid color-mix(in srgb, ${m.roleColor} 35%, transparent)`,
+            ["--role-color" as never]: m.roleColor,
+            paddingLeft: 12,
           }}
         >
-          {m.role}
+          <span className="ew-team-role-bar" aria-hidden />
+          <span className="ew-team-role-text">{m.role}</span>
         </span>
       </div>
+
 
       <p
         style={{
@@ -156,6 +153,43 @@ export default function Team() {
         @keyframes ew-team-ring {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
+        }
+
+        .ew-team-name {
+          color: #14140f;
+        }
+        :root[data-theme="dark"] .ew-team-name,
+        :root:not([data-theme="light"]) .ew-team-name {
+          color: #f0ede6;
+        }
+
+        .ew-team-role {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 6px 14px 6px 14px;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 1.2px;
+          text-transform: uppercase;
+          color: var(--role-color);
+          background: color-mix(in srgb, var(--role-color) 10%, transparent);
+          border: 1px solid color-mix(in srgb, var(--role-color) 30%, transparent);
+          border-left: none;
+          clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+        }
+        .ew-team-role-bar {
+          position: absolute;
+          left: 0;
+          top: 0;
+          bottom: 0;
+          width: 3px;
+          background: var(--role-color);
+          box-shadow: 0 0 12px color-mix(in srgb, var(--role-color) 70%, transparent);
+        }
+        .ew-team-role-text {
+          position: relative;
         }
 
         .ew-team-header h1 {
