@@ -155,6 +155,43 @@ export default function Team() {
           100% { transform: rotate(360deg); }
         }
 
+        .ew-team-name {
+          color: #14140f;
+        }
+        :root[data-theme="dark"] .ew-team-name,
+        :root:not([data-theme="light"]) .ew-team-name {
+          color: #f0ede6;
+        }
+
+        .ew-team-role {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 6px 14px 6px 14px;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 1.2px;
+          text-transform: uppercase;
+          color: var(--role-color);
+          background: color-mix(in srgb, var(--role-color) 10%, transparent);
+          border: 1px solid color-mix(in srgb, var(--role-color) 30%, transparent);
+          border-left: none;
+          clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+        }
+        .ew-team-role-bar {
+          position: absolute;
+          left: 0;
+          top: 0;
+          bottom: 0;
+          width: 3px;
+          background: var(--role-color);
+          box-shadow: 0 0 12px color-mix(in srgb, var(--role-color) 70%, transparent);
+        }
+        .ew-team-role-text {
+          position: relative;
+        }
+
         .ew-team-header h1 {
           font-size: 32px;
           font-weight: 700;
