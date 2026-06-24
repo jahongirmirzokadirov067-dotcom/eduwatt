@@ -1,12 +1,15 @@
 import Shell from "@/components/eduwatt/Shell";
 import { useLanguage } from "@/context/LanguageContext";
 import jahongirAsset from "@/assets/jahongirmirzo.jpg.asset.json";
+import azizbekIAsset from "@/assets/azizbek-ibrohimov.jpg.asset.json";
+import azizbekTAsset from "@/assets/azizbek-toshpolatov.jpg.asset.json";
 
 type Member = {
   name: string;
   role: string;
   roleColor: string;
   photo?: string;
+  photoPosition?: string;
   initials: string;
   bio: string;
 };
@@ -17,6 +20,7 @@ const members: Member[] = [
     role: "Team Lead",
     roleColor: "#C8FF00",
     photo: jahongirAsset.url,
+    photoPosition: "center 20%",
     initials: "JQ",
     bio: "Leads vision, product strategy, and engineering direction for EduWatt.",
   },
@@ -24,6 +28,8 @@ const members: Member[] = [
     name: "Azizbek Ibrohimov",
     role: "Business",
     roleColor: "#60a5fa",
+    photo: azizbekIAsset.url,
+    photoPosition: "center 18%",
     initials: "AI",
     bio: "Drives partnerships, go-to-market, and stakeholder relations.",
   },
@@ -31,6 +37,8 @@ const members: Member[] = [
     name: "Azizbek Toshpo'latov",
     role: "UI / UX",
     roleColor: "#c084fc",
+    photo: azizbekTAsset.url,
+    photoPosition: "center 22%",
     initials: "AT",
     bio: "Crafts the visual language and seamless user experience.",
   },
@@ -76,7 +84,7 @@ function MemberCard({ m, i }: { m: Member; i: number }) {
             <img
               src={m.photo}
               alt={m.name}
-              style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }}
+              style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: m.photoPosition ?? "center", borderRadius: "50%" }}
             />
           ) : (
             <PlaceholderAvatar initials={m.initials} color={m.roleColor} />
