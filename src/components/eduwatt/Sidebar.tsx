@@ -11,6 +11,7 @@ const items = [
   { key: "nav.reports", to: "/reports" },
   { key: "nav.dataInput", to: "/data-input", icon: "▤" },
   { key: "nav.impact", to: "/impact", icon: "◯" },
+  { key: "nav.team", to: "/team" },
   { key: "nav.settings", to: "/settings" },
 ];
 

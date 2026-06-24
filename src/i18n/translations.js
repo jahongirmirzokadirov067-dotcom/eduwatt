@@ -10,6 +10,7 @@ const en = {
   "nav.dataInput": "Data input",
   "nav.impact": "National impact",
   "nav.settings": "Settings",
+  "nav.team": "Team",
 
   // Topbar
   "topbar.live": "LIVE",
@@ -228,6 +229,7 @@ const uz = {
   "nav.dataInput": "Ma'lumot kiritish",
   "nav.impact": "Milliy ta'sir",
   "nav.settings": "Sozlamalar",
+  "nav.team": "Jamoa",
 
   // Topbar
   "topbar.live": "JONLI",
