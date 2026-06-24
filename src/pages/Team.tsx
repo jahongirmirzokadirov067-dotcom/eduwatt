@@ -26,21 +26,21 @@ const members: Member[] = [
   },
   {
     name: "Azizbek Ibrohimov",
-    role: "Business",
-    roleColor: "#60a5fa",
+    role: "UI / UX",
+    roleColor: "#c084fc",
     photo: azizbekIAsset.url,
     photoPosition: "center 18%",
     initials: "AI",
-    bio: "Drives partnerships, go-to-market, and stakeholder relations.",
+    bio: "Crafts the visual language and seamless user experience.",
   },
   {
     name: "Azizbek Toshpo'latov",
-    role: "UI / UX",
-    roleColor: "#c084fc",
+    role: "Business",
+    roleColor: "#60a5fa",
     photo: azizbekTAsset.url,
     photoPosition: "center 22%",
     initials: "AT",
-    bio: "Crafts the visual language and seamless user experience.",
+    bio: "Drives partnerships, go-to-market, and stakeholder relations.",
   },
 ];
 
