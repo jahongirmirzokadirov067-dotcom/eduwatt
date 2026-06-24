@@ -84,7 +84,7 @@ function MemberCard({ m, i }: { m: Member; i: number }) {
             <img
               src={m.photo}
               alt={m.name}
-              style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }}
+              style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: m.photoPosition ?? "center", borderRadius: "50%" }}
             />
           ) : (
             <PlaceholderAvatar initials={m.initials} color={m.roleColor} />
