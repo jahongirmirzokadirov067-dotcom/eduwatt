@@ -93,11 +93,13 @@ function MemberCard({ m, i }: { m: Member; i: number }) {
       </div>
 
       <h3
+        className="ew-team-name"
         style={{
+          position: "relative",
+          zIndex: 2,
           fontSize: 18,
-          fontWeight: 600,
-          color: "var(--text-primary)",
-          margin: "20px 0 8px",
+          fontWeight: 700,
+          margin: "20px 0 10px",
           textAlign: "center",
           letterSpacing: "-0.3px",
         }}
@@ -105,24 +107,19 @@ function MemberCard({ m, i }: { m: Member; i: number }) {
         {m.name}
       </h3>
 
-      <div style={{ display: "flex", justifyContent: "center", marginBottom: 14 }}>
+      <div style={{ display: "flex", justifyContent: "center", marginBottom: 14, position: "relative", zIndex: 2 }}>
         <span
+          className="ew-team-role"
           style={{
-            display: "inline-block",
-            padding: "4px 12px",
-            borderRadius: 999,
-            fontSize: 11,
-            fontWeight: 600,
-            letterSpacing: "0.4px",
-            textTransform: "uppercase",
-            color: m.roleColor,
-            background: `color-mix(in srgb, ${m.roleColor} 14%, transparent)`,
-            border: `1px solid color-mix(in srgb, ${m.roleColor} 35%, transparent)`,
+            ["--role-color" as never]: m.roleColor,
+            paddingLeft: 12,
           }}
         >
-          {m.role}
+          <span className="ew-team-role-bar" aria-hidden />
+          <span className="ew-team-role-text">{m.role}</span>
         </span>
       </div>
+
 
       <p
         style={{
