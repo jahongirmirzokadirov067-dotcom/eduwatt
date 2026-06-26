@@ -12,6 +12,16 @@ const en = {
   "nav.settings": "Settings",
   "nav.team": "Team",
 
+  // Mini apps
+  "apps.title": "Mini apps",
+  "apps.calculator": "Bill Calculator",
+  "apps.soon": "Coming soon",
+  "calc.title": "Electricity Bill Calculator",
+  "calc.subtitle": "Tashkent monthly base tariff · UZS",
+  "calc.input.label": "Monthly consumption",
+  "calc.yours": "YOURS",
+  "calc.total": "ESTIMATED BILL",
+
   // Topbar
   "topbar.live": "LIVE",
   "topbar.theme.dark": "☾ DARK",
