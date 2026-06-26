@@ -11,6 +11,7 @@ const en = {
   "nav.impact": "National impact",
   "nav.settings": "Settings",
   "nav.team": "Team",
+  "nav.aiAnalysis": "AI Analysis",
 
   // Mini apps
   "apps.title": "Mini apps",
@@ -240,6 +241,7 @@ const uz = {
   "nav.impact": "Milliy ta'sir",
   "nav.settings": "Sozlamalar",
   "nav.team": "Jamoa",
+  "nav.aiAnalysis": "AI tahlil",
 
   // Mini apps
   "apps.title": "Mini ilovalar",
