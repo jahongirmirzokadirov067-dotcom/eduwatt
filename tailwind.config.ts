@@ -87,5 +87,11 @@ export default {
       },
     },
   },
+      fontFamily: {
+        display: ["Space Grotesk", "system-ui", "sans-serif"],
+        body: ["DM Sans", "system-ui", "sans-serif"],
+      },
+    },
+  },
   plugins: [require("tailwindcss-animate")],
 } satisfies Config;
