@@ -129,7 +129,7 @@ export default function Login() {
         alignItems: "center",
         justifyContent: "center",
         padding: 16,
-        fontFamily: "Inter, sans-serif",
+        fontFamily: "DM Sans, sans-serif",
       }}
     >
       <div style={cardStyle}>
