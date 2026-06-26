@@ -35,10 +35,11 @@ const labelStyle: React.CSSProperties = {
 const sectionTitleStyle: React.CSSProperties = {
   fontSize: 15,
   fontWeight: 600,
-  color: "#c8c4bc",
+  color: "var(--text-primary)",
   marginTop: 8,
   marginBottom: 4,
 };
+
 
 function KpiCard({ accent, label, value, sub }: { accent: string; label: string; value: string; sub: string }) {
   return (
