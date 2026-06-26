@@ -9,6 +9,7 @@ const items = [
   { key: "nav.zones", to: "/zones" },
   { key: "nav.alerts", to: "/alerts" },
   { key: "nav.reports", to: "/reports" },
+  { key: "nav.aiAnalysis", to: "/ai-analysis", icon: "✦" },
   { key: "nav.dataInput", to: "/data-input", icon: "▤" },
   { key: "nav.impact", to: "/impact", icon: "◯" },
   { key: "nav.team", to: "/team" },
