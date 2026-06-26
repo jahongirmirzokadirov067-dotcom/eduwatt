@@ -90,7 +90,6 @@ export default function Topbar({ title, onMenuClick }: { title?: string; onMenuC
           />
           <span style={{ fontSize: 11, color: "var(--text-muted)" }}>{t("topbar.live")}</span>
         </div>
-        <MiniApps />
         <button
           type="button"
           onClick={() => setLang(lang === "en" ? "uz" : "en")}
