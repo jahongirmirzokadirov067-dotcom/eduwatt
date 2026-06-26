@@ -127,13 +127,12 @@ export default function Zones() {
       <div style={cardStyle}>
         <div style={labelStyle}>Zones</div>
         <div className="eduwatt-scroll-x">
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, minWidth: 620 }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, minWidth: 420 }}>
           <thead>
             <tr style={{ color: "var(--text-meta)", textAlign: "left", fontSize: 11, textTransform: "uppercase" }}>
               <th style={{ padding: "8px 6px" }}>Name</th>
               <th style={{ padding: "8px 6px" }}>Type</th>
               <th style={{ padding: "8px 6px" }}>Current kW</th>
-              <th style={{ padding: "8px 6px" }}>Grid kWh</th>
               <th style={{ padding: "8px 6px" }}>Status</th>
               <th style={{ padding: "8px 6px" }}></th>
             </tr>
@@ -174,16 +173,6 @@ export default function Zones() {
                     />
                   </td>
                   <td style={{ padding: "10px 6px" }}>
-                    <input
-                      type="number"
-                      min={0}
-                      step={1}
-                      defaultValue={Number(z.grid_kwh ?? 0).toFixed(0)}
-                      onBlur={(e) => updateZoneField(z.id, "grid_kwh", parseFloat(e.target.value))}
-                      style={{ width: 90, background: "var(--bg-elevated)", border: "1px solid var(--border)", color: "var(--text-primary)", padding: "4px 8px", borderRadius: 6, fontSize: 13 }}
-                    />
-                  </td>
-                  <td style={{ padding: "10px 6px" }}>
                     {wasteFlag || z.zone_type === "waste" ? (
                       <span style={{ color: "#ff6b6b", fontSize: 11, fontWeight: 600 }}>⚠ WASTE</span>
                     ) : (
@@ -203,10 +192,6 @@ export default function Zones() {
             })}
           </tbody>
         </table>
-        </div>
-
-        <div style={{ marginTop: 12, fontSize: 12, color: "var(--text-meta)" }}>
-          Total grid usage across zones: <strong style={{ color: "var(--text-primary)" }}>{zones.reduce((s, z) => s + Number(z.grid_kwh || 0), 0).toFixed(0)} kWh</strong>
         </div>
 
         <div style={{ display: "flex", gap: 8, marginTop: 16, paddingTop: 16, borderTop: "1px solid var(--border-soft)" }}>
