@@ -223,7 +223,7 @@ export default function MiniApps() {
         {open && (
           <div
             style={{
-              position: "absolute", top: "calc(100% + 8px)", right: 0, zIndex: 100,
+              position: "absolute", bottom: "calc(100% + 8px)", right: 0, zIndex: 100,
               background: "var(--bg-app)", border: "1px solid var(--border)",
               borderRadius: 14, padding: 12, minWidth: 240,
               boxShadow: "0 12px 40px rgba(0,0,0,0.35)",
