@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/context/LanguageContext";
 
 type AppKey = "calculator";
+
 
 const TIERS = [
   { from: 0, to: 200, rate: 650, color: "#22c55e" },
