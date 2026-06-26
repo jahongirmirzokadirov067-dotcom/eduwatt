@@ -74,7 +74,8 @@ export default function Zones() {
   const updateZoneField = async (id: string, field: "current_kw" | "grid_kwh", value: number) => {
     const v = Number.isFinite(value) ? Math.max(0, value) : 0;
     setZones((arr) => arr.map((z) => (z.id === id ? { ...z, [field]: v } : z)));
-    const { error } = await supabase.from("zones").update({ [field]: v }).eq("id", id);
+    const payload = field === "current_kw" ? { current_kw: v } : { grid_kwh: v };
+    const { error } = await supabase.from("zones").update(payload).eq("id", id);
     if (error) return toast.error(error.message);
     notifyZones();
   };
