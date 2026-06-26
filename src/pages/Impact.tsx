@@ -35,10 +35,11 @@ const labelStyle: React.CSSProperties = {
 const sectionTitleStyle: React.CSSProperties = {
   fontSize: 15,
   fontWeight: 600,
-  color: "#c8c4bc",
+  color: "var(--text-primary)",
   marginTop: 8,
   marginBottom: 4,
 };
+
 
 function KpiCard({ accent, label, value, sub }: { accent: string; label: string; value: string; sub: string }) {
   return (
@@ -94,8 +95,9 @@ export default function Impact() {
   return (
     <Shell title={t("topbar.title.impact") as string}>
       <div>
-        <div style={{ fontSize: 22, fontWeight: 600, color: "#f0ede6", letterSpacing: "-0.5px" }}>{t("impact.title")}</div>
-        <div style={{ fontSize: 13, color: "#888", marginTop: 4 }}>{t("impact.subtitle")}</div>
+        <div style={{ fontSize: 22, fontWeight: 600, color: "var(--text-primary)", letterSpacing: "-0.5px" }}>{t("impact.title")}</div>
+        <div style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 4 }}>{t("impact.subtitle")}</div>
+
       </div>
 
       <div style={{ background: "#0d1a0d", border: "1px solid #1a2e1a", borderRadius: 12, padding: "20px 24px", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
