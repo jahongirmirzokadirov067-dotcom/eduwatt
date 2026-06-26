@@ -96,12 +96,19 @@ const AiAnalysisPanel = forwardRef<AiAnalysisHandle, Props>(function AiAnalysisP
   const { alerts } = useAlerts();
   const { items: recs } = useAiRecommendations();
 
-  const { messages, append, setMessages } = useThreadMessages(threadId);
+  const { messages, append, setMessages, refetch: refetchMessages } = useThreadMessages(threadId);
   const [streaming, setStreaming] = useState(false);
   const [streamBuf, setStreamBuf] = useState("");
   const [input, setInput] = useState("");
+  const [activeReqId, setActiveReqId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const messagesRef = useRef<ChatMessage[]>(messages);
+  const streamingRef = useRef(false);
+  const inFlightReqIdRef = useRef<string | null>(null);
+
+  useEffect(() => { messagesRef.current = messages; }, [messages]);
+  useEffect(() => { streamingRef.current = streaming; }, [streaming]);
 
   const ctx = useMemo(
     () => buildDashboardContext({ profile, records, latest, solar, alerts, recs }),
@@ -112,11 +119,18 @@ const AiAnalysisPanel = forwardRef<AiAnalysisHandle, Props>(function AiAnalysisP
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, streamBuf]);
 
-  const runStream = async (history: { role: "user" | "assistant" | "system"; content: string }[], targetThreadId: string) => {
+  const runStream = async (
+    history: { role: "user" | "assistant" | "system"; content: string }[],
+    targetThreadId: string,
+    reqId: string,
+  ) => {
     setStreaming(true);
+    setActiveReqId(reqId);
+    inFlightReqIdRef.current = reqId;
     setStreamBuf("");
     const controller = new AbortController();
     abortRef.current = controller;
+    console.log("[ai-chat] request →", { reqId, threadId: targetThreadId, msgs: history.length });
     try {
       const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`;
       const res = await fetch(url, {
@@ -125,13 +139,15 @@ const AiAnalysisPanel = forwardRef<AiAnalysisHandle, Props>(function AiAnalysisP
           "Content-Type": "application/json",
           Authorization: `Bearer ${session?.access_token ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          "x-request-id": reqId,
         },
         body: JSON.stringify({ messages: history, context: ctx }),
         signal: controller.signal,
       });
+      console.log("[ai-chat] response status", { reqId, status: res.status });
       if (!res.ok || !res.body) {
         const t = await res.text().catch(() => "");
-        throw new Error(`AI error ${res.status}: ${t.slice(0, 120)}`);
+        throw new Error(`AI error ${res.status}: ${t.slice(0, 160)}`);
       }
       const reader = res.body.getReader();
       const dec = new TextDecoder();
@@ -140,56 +156,87 @@ const AiAnalysisPanel = forwardRef<AiAnalysisHandle, Props>(function AiAnalysisP
         const { value, done } = await reader.read();
         if (done) break;
         acc += dec.decode(value, { stream: true });
-        setStreamBuf(acc);
+        // Ignore stream chunks from a superseded request
+        if (inFlightReqIdRef.current === reqId) setStreamBuf(acc);
       }
+      console.log("[ai-chat] stream complete", { reqId, chars: acc.length });
+      if (inFlightReqIdRef.current !== reqId) {
+        console.warn("[ai-chat] superseded — discarding result", { reqId });
+        return;
+      }
+      if (!acc.trim()) throw new Error("Empty response from AI");
       // Persist assistant message
       await append("assistant", acc);
       onTouchThread(targetThreadId, acc.slice(0, 140));
       setStreamBuf("");
     } catch (e: any) {
-      const errText = `_Sorry — the AI request failed: ${e?.message ?? "unknown error"}._`;
-      await append("assistant", errText);
+      console.error("[ai-chat] error", { reqId, error: e });
+      if (inFlightReqIdRef.current === reqId) {
+        const msg = e?.name === "AbortError"
+          ? "_Request cancelled._"
+          : `_Something went wrong — please try again. (${e?.message ?? "unknown error"})_`;
+        try { await append("assistant", msg); } catch { /* noop */ }
+        setStreamBuf("");
+      }
     } finally {
-      setStreaming(false);
-      abortRef.current = null;
+      if (inFlightReqIdRef.current === reqId) {
+        setStreaming(false);
+        setActiveReqId(null);
+        inFlightReqIdRef.current = null;
+        abortRef.current = null;
+      }
     }
   };
 
   const sendPrompt = async (text: string) => {
     const trimmed = text.trim();
-    if (!trimmed || streaming) return;
+    if (!trimmed) return;
+    if (streamingRef.current) {
+      console.warn("[ai-chat] send blocked — request already in flight");
+      return;
+    }
+    const reqId = crypto.randomUUID();
     let tid = threadId;
+    const isNewThread = !tid;
     if (!tid) {
       tid = await onCreateThread();
       if (!tid) return;
+      // Give the thread-message hook a tick to refetch (would otherwise wipe optimistic UI)
+      await new Promise((r) => setTimeout(r, 80));
     }
     setInput("");
-    // Optimistic user message
-    const userMsg: ChatMessage = {
-      id: crypto.randomUUID(), thread_id: tid, role: "user",
+    // Persist user message first (canonical), then mirror locally
+    try {
+      await append("user", trimmed);
+    } catch (e) {
+      console.error("[ai-chat] failed to save user message", e);
+    }
+    // Build history from the latest known messages + this user turn
+    const baseline = messagesRef.current;
+    const hasUserMsg = baseline.some((m) => m.role === "user" && m.content === trimmed);
+    const history = (hasUserMsg ? baseline : [...baseline, {
+      id: reqId, thread_id: tid, role: "user" as const,
       content: trimmed, created_at: new Date().toISOString(),
-    };
-    setMessages((m) => [...m, userMsg]);
-    await append("user", trimmed);
-    const history = [...messages, userMsg].map((m) => ({ role: m.role as any, content: m.content }));
-    await runStream(history, tid);
+    }]).map((m) => ({ role: m.role as any, content: m.content }));
+    await runStream(history, tid, reqId);
+    // Reconcile with DB after stream so any race with the thread refetch is healed
+    if (isNewThread) refetchMessages();
   };
 
-  useImperativeHandle(ref, () => ({ send: sendPrompt }), [threadId, messages, streaming, ctx]);
+  useImperativeHandle(ref, () => ({ send: sendPrompt }), [threadId, ctx]);
 
   const isEmpty = !messages.length && !streaming && !streamBuf;
   const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
   const followups = lastAssistant ? extractFollowups(lastAssistant.content) : [];
 
   const handleRegenerate = async () => {
-    if (!threadId || streaming) return;
-    // Remove last assistant, re-run
+    if (!threadId || streamingRef.current) return;
     const lastIdx = [...messages].map((m) => m.role).lastIndexOf("assistant");
     if (lastIdx < 0) return;
     const trimmed = messages.slice(0, lastIdx);
     setMessages(trimmed);
     const history = trimmed.map((m) => ({ role: m.role as any, content: m.content }));
-    await runStream(history, threadId);
+    await runStream(history, threadId, crypto.randomUUID());
   };
 
   return (
