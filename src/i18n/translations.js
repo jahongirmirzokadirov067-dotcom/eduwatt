@@ -241,6 +241,16 @@ const uz = {
   "nav.settings": "Sozlamalar",
   "nav.team": "Jamoa",
 
+  // Mini apps
+  "apps.title": "Mini ilovalar",
+  "apps.calculator": "Hisob-kitob",
+  "apps.soon": "Tez kunda",
+  "calc.title": "Elektr to'lov kalkulyatori",
+  "calc.subtitle": "Toshkent oylik bazaviy tarif · UZS",
+  "calc.input.label": "Oylik iste'mol",
+  "calc.yours": "SIZNIKI",
+  "calc.total": "TAXMINIY TO'LOV",
+
   // Topbar
   "topbar.live": "JONLI",
   "topbar.theme.dark": "☾ TUN",
