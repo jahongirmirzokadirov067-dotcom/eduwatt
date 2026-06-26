@@ -48,8 +48,9 @@ function MessageBubble({ msg, onCopy, onRegenerate, onFeedback, isLast }: {
         padding: isUser ? "10px 14px" : "0",
         background: isUser ? "var(--accent)" : "transparent",
         color: isUser ? "var(--accent-text)" : "var(--text-primary)",
-        borderRadius: 12,
+        borderRadius: isUser ? 12 : 0,
         fontSize: 13, lineHeight: 1.55,
+        width: isUser ? "fit-content" : "auto",
       }}>
         {isUser ? (
           <div style={{ whiteSpace: "pre-wrap" }}>{msg.content}</div>
@@ -59,6 +60,7 @@ function MessageBubble({ msg, onCopy, onRegenerate, onFeedback, isLast }: {
           </div>
         )}
       </div>
+
       {!isUser && isLast && msg.content && (
         <div style={{ display: "flex", gap: 6, marginTop: 2 }}>
           <button onClick={onCopy} style={iconBtn} aria-label="Copy">Copy</button>
