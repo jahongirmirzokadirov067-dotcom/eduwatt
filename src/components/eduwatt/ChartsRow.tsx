@@ -4,11 +4,6 @@ import { useLanguage } from "@/context/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 
-function lerpColorCSS(t: number, base: string, peak: string) {
-  const pct = Math.round(t * 100);
-  return `color-mix(in srgb, ${peak} ${pct}%, ${base})`;
-}
-
 const cardStyle: React.CSSProperties = {
   background: "var(--bg-surface)",
   border: "1px solid var(--border)",
