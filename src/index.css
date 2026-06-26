@@ -306,4 +306,19 @@
 
 @media (max-width: 900px) {
   .ew-overview-grid { grid-template-columns: 1fr !important; }
+  .ew-ai-layout {
+    grid-template-columns: 1fr !important;
+    min-height: 0 !important;
+  }
+  .ew-ai-layout > aside {
+    max-height: 220px;
+    order: 2;
+  }
+  .ew-ai-layout > div {
+    order: 1;
+  }
 }
+@media (max-width: 768px) {
+  .ew-ai-layout > aside { max-height: 180px; }
+}
+
