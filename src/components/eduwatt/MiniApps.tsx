@@ -205,19 +205,23 @@ export default function MiniApps() {
           onClick={() => setOpen((o) => !o)}
           aria-label="Mini apps"
           style={{
-            background: "var(--bg-surface)",
-            border: "1px solid var(--border)",
-            borderRadius: 12,
-            width: 32, height: 28,
+            background: "linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 70%, transparent))",
+            border: "1px solid color-mix(in srgb, var(--accent) 60%, transparent)",
+            borderRadius: 999,
+            width: 56, height: 56,
             display: "flex", alignItems: "center", justifyContent: "center",
-            color: "var(--text-secondary)", cursor: "pointer", padding: 0,
+            color: "var(--accent-text)", cursor: "pointer", padding: 0,
+            boxShadow: "0 10px 30px rgba(0,0,0,0.35), 0 0 0 4px color-mix(in srgb, var(--accent) 12%, transparent)",
+            transition: "transform 0.18s ease, box-shadow 0.18s ease",
           }}
+          onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px) scale(1.05)"; e.currentTarget.style.boxShadow = "0 14px 36px rgba(0,0,0,0.45), 0 0 0 6px color-mix(in srgb, var(--accent) 20%, transparent)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "0 10px 30px rgba(0,0,0,0.35), 0 0 0 4px color-mix(in srgb, var(--accent) 12%, transparent)"; }}
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-            <rect x="3" y="3" width="7" height="7" rx="1.5"/>
-            <rect x="14" y="3" width="7" height="7" rx="1.5"/>
-            <rect x="3" y="14" width="7" height="7" rx="1.5"/>
-            <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+            <rect x="3" y="3" width="7" height="7" rx="1.8"/>
+            <rect x="14" y="3" width="7" height="7" rx="1.8"/>
+            <rect x="3" y="14" width="7" height="7" rx="1.8"/>
+            <rect x="14" y="14" width="7" height="7" rx="1.8"/>
           </svg>
         </button>
         {open && (
