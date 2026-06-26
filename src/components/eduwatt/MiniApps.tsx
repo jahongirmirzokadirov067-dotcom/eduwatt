@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/context/LanguageContext";
 
 type AppKey = "calculator";
+
 
 const TIERS = [
   { from: 0, to: 200, rate: 650, color: "#22c55e" },
@@ -184,9 +186,11 @@ function Calculator({ onClose }: { onClose: () => void }) {
 
 export default function MiniApps() {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [activeApp, setActiveApp] = useState<AppKey | null>(null);
   const ref = useRef<HTMLDivElement>(null);
+
 
   useEffect(() => {
     if (!open) return;
@@ -272,31 +276,54 @@ export default function MiniApps() {
                   {t("apps.calculator")}
                 </span>
               </button>
-              {[0, 1].map((i) => (
-                <div
-                  key={i}
-                  style={{
-                    display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
-                    padding: "12px 6px", borderRadius: 10,
-                    background: "var(--bg-surface)", border: "1px dashed var(--border)",
-                    opacity: 0.5,
-                  }}
-                >
-                  <div style={{
-                    width: 36, height: 36, borderRadius: 10,
-                    background: "var(--bg-elevated)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    color: "var(--text-meta)",
-                  }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-                    </svg>
-                  </div>
-                  <span style={{ fontSize: 10, fontWeight: 600, color: "var(--text-meta)" }}>
-                    {t("apps.soon")}
-                  </span>
+              <button
+                type="button"
+                onClick={() => { navigate("/ai-analysis"); setOpen(false); }}
+                style={{
+                  display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
+                  padding: "12px 6px", borderRadius: 10,
+                  background: "var(--bg-surface)", border: "1px solid var(--border)",
+                  cursor: "pointer", color: "var(--text-primary)", fontFamily: "inherit",
+                  transition: "transform 0.15s, border-color 0.15s",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--accent)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.transform = "none"; }}
+              >
+                <div style={{
+                  width: 36, height: 36, borderRadius: 10,
+                  background: "linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 60%, transparent))",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  color: "var(--accent-text)", fontSize: 18, fontWeight: 800,
+                }}>
+                  ✦
                 </div>
-              ))}
+                <span style={{ fontSize: 10, fontWeight: 600, textAlign: "center", lineHeight: 1.2 }}>
+                  {t("nav.aiAnalysis")}
+                </span>
+              </button>
+              <div
+                style={{
+                  display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
+                  padding: "12px 6px", borderRadius: 10,
+                  background: "var(--bg-surface)", border: "1px dashed var(--border)",
+                  opacity: 0.5,
+                }}
+              >
+                <div style={{
+                  width: 36, height: 36, borderRadius: 10,
+                  background: "var(--bg-elevated)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  color: "var(--text-meta)",
+                }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                  </svg>
+                </div>
+                <span style={{ fontSize: 10, fontWeight: 600, color: "var(--text-meta)" }}>
+                  {t("apps.soon")}
+                </span>
+              </div>
+
             </div>
           </div>
         )}

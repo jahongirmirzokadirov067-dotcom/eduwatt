@@ -48,8 +48,9 @@ function MessageBubble({ msg, onCopy, onRegenerate, onFeedback, isLast }: {
         padding: isUser ? "10px 14px" : "0",
         background: isUser ? "var(--accent)" : "transparent",
         color: isUser ? "var(--accent-text)" : "var(--text-primary)",
-        borderRadius: 12,
+        borderRadius: isUser ? 12 : 0,
         fontSize: 13, lineHeight: 1.55,
+        width: isUser ? "fit-content" : "auto",
       }}>
         {isUser ? (
           <div style={{ whiteSpace: "pre-wrap" }}>{msg.content}</div>
@@ -59,6 +60,7 @@ function MessageBubble({ msg, onCopy, onRegenerate, onFeedback, isLast }: {
           </div>
         )}
       </div>
+
       {!isUser && isLast && msg.content && (
         <div style={{ display: "flex", gap: 6, marginTop: 2 }}>
           <button onClick={onCopy} style={iconBtn} aria-label="Copy">Copy</button>
@@ -72,10 +74,11 @@ function MessageBubble({ msg, onCopy, onRegenerate, onFeedback, isLast }: {
 }
 
 const iconBtn: React.CSSProperties = {
-  fontSize: 10, fontWeight: 600, padding: "3px 8px", borderRadius: 6,
+  fontSize: 10, fontWeight: 600, padding: "4px 9px", borderRadius: 8,
   border: "1px solid var(--border)", background: "transparent",
   color: "var(--text-meta)", cursor: "pointer", fontFamily: "inherit",
 };
+
 
 function extractFollowups(text: string): string[] {
   const m = text.match(/\*\*Follow-?ups?:?\*\*\s*([\s\S]*)$/i);
@@ -201,27 +204,29 @@ const AiAnalysisPanel = forwardRef<AiAnalysisHandle, Props>(function AiAnalysisP
     if (!tid) {
       tid = await onCreateThread();
       if (!tid) return;
-      // Give the thread-message hook a tick to refetch (would otherwise wipe optimistic UI)
-      await new Promise((r) => setTimeout(r, 80));
     }
     setInput("");
-    // Persist user message first (canonical), then mirror locally
-    try {
-      await append("user", trimmed);
-    } catch (e) {
-      console.error("[ai-chat] failed to save user message", e);
-    }
-    // Build history from the latest known messages + this user turn
-    const baseline = messagesRef.current;
-    const hasUserMsg = baseline.some((m) => m.role === "user" && m.content === trimmed);
-    const history = (hasUserMsg ? baseline : [...baseline, {
-      id: reqId, thread_id: tid, role: "user" as const,
+
+    // Optimistic local user message — instant render
+    const optimisticUserMsg: ChatMessage = {
+      id: reqId, thread_id: tid, role: "user",
       content: trimmed, created_at: new Date().toISOString(),
-    }]).map((m) => ({ role: m.role as any, content: m.content }));
+    };
+    const baseline = messagesRef.current;
+    const optimisticList = [...baseline, optimisticUserMsg];
+    setMessages(optimisticList);
+
+    // Persist user message in the background (do NOT block the AI request)
+    append("user", trimmed).catch((e) =>
+      console.error("[ai-chat] failed to save user message", e),
+    );
+
+    // Fire AI request immediately
+    const history = optimisticList.map((m) => ({ role: m.role as any, content: m.content }));
     await runStream(history, tid, reqId);
-    // Reconcile with DB after stream so any race with the thread refetch is healed
     if (isNewThread) refetchMessages();
   };
+
 
   useImperativeHandle(ref, () => ({ send: sendPrompt }), [threadId, ctx]);
 
@@ -305,7 +310,7 @@ const AiAnalysisPanel = forwardRef<AiAnalysisHandle, Props>(function AiAnalysisP
                   key={a.label}
                   onClick={() => sendPrompt(a.prompt)}
                   style={{
-                    fontSize: 12, fontWeight: 600, padding: "8px 14px", borderRadius: 999,
+                    fontSize: 12, fontWeight: 600, padding: "8px 14px", borderRadius: 10,
                     border: "1px solid var(--border)", background: "var(--bg-elevated)",
                     color: "var(--text-primary)", cursor: "pointer", fontFamily: "inherit",
                   }}
@@ -313,6 +318,7 @@ const AiAnalysisPanel = forwardRef<AiAnalysisHandle, Props>(function AiAnalysisP
                   {a.label}
                 </button>
               ))}
+
             </div>
           </div>
         )}
@@ -345,7 +351,7 @@ const AiAnalysisPanel = forwardRef<AiAnalysisHandle, Props>(function AiAnalysisP
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: -8 }}>
             {followups.map((q, i) => (
               <button key={i} onClick={() => sendPrompt(q)} style={{
-                fontSize: 11, fontWeight: 500, padding: "6px 10px", borderRadius: 999,
+                fontSize: 11, fontWeight: 500, padding: "6px 10px", borderRadius: 10,
                 border: "1px dashed var(--border)", background: "transparent",
                 color: "var(--text-secondary)", cursor: "pointer", fontFamily: "inherit",
               }}>
@@ -373,8 +379,8 @@ const AiAnalysisPanel = forwardRef<AiAnalysisHandle, Props>(function AiAnalysisP
           placeholder="Ask anything about your building…"
           rows={1}
           style={{
-            flex: 1, resize: "none", minHeight: 40, maxHeight: 140,
-            padding: "10px 14px", borderRadius: 10,
+            flex: 1, resize: "none", minHeight: 44, maxHeight: 140,
+            padding: "12px 14px", borderRadius: 12,
             background: "var(--bg-app)", border: "1px solid var(--border)",
             color: "var(--text-primary)", fontSize: 13, fontFamily: "inherit", outline: "none",
             lineHeight: 1.4,
@@ -384,15 +390,17 @@ const AiAnalysisPanel = forwardRef<AiAnalysisHandle, Props>(function AiAnalysisP
           onClick={() => sendPrompt(input)}
           disabled={streaming || !input.trim()}
           style={{
-            padding: "10px 18px", borderRadius: 10, border: "none",
+            padding: "12px 18px", borderRadius: 10, border: "none",
             background: streaming || !input.trim() ? "var(--bg-elevated)" : "var(--accent)",
             color: streaming || !input.trim() ? "var(--text-meta)" : "var(--accent-text)",
             fontSize: 13, fontWeight: 700, cursor: streaming ? "wait" : "pointer", fontFamily: "inherit",
+            minHeight: 44,
           }}
         >
           {streaming ? "…" : "Send"}
         </button>
       </div>
+
     </div>
   );
 });
