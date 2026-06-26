@@ -98,9 +98,9 @@ function ZonesChart() {
     return () => window.removeEventListener("eduwatt:zones-updated", handler);
   }, [user]);
 
-  const max = Math.max(...zones.map((z) => Number(z.current_kw) || 0), 0.001);
-  const colorFor = (type: string) =>
-    type === "thermal" ? "var(--warn-color)" : type === "waste" ? "var(--crit-color)" : "var(--grid-color)";
+  const values = zones.map((z) => Number(z.current_kw) || 0);
+  const max = Math.max(...values, 0.001);
+  const avg = values.reduce((a, b) => a + b, 0) / (values.length || 1);
 
   return (
     <div style={cardStyle}>
@@ -112,17 +112,30 @@ function ZonesChart() {
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          {zones.map((z) => (
-            <div key={z.id}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>{z.name}</span>
-                <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-primary)", letterSpacing: "-0.5px" }}>{Number(z.current_kw).toFixed(1)} kW</span>
+          {zones.map((z) => {
+            const val = Number(z.current_kw) || 0;
+            const above = val > avg;
+            return (
+              <div key={z.id}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                  <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>{z.name}</span>
+                  <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    {above && (
+                      <span style={{ fontSize: 10, fontWeight: 600, color: "var(--warn-color)", letterSpacing: "0.2px" }}>
+                        above avg
+                      </span>
+                    )}
+                    <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-primary)", letterSpacing: "-0.5px" }}>
+                      {val.toFixed(1)} kW
+                    </span>
+                  </span>
+                </div>
+                <div style={{ height: 8, background: "var(--bg-elevated)", borderRadius: 2, overflow: "hidden" }}>
+                  <div style={{ width: `${(val / max) * 100}%`, height: "100%", background: above ? "var(--warn-color)" : "var(--accent)", borderRadius: 2 }} />
+                </div>
               </div>
-              <div style={{ height: 8, background: "var(--bg-elevated)", borderRadius: 2, overflow: "hidden" }}>
-                <div style={{ width: `${(Number(z.current_kw) / max) * 100}%`, height: "100%", background: colorFor(z.zone_type), borderRadius: 2 }} />
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
