@@ -186,9 +186,11 @@ function Calculator({ onClose }: { onClose: () => void }) {
 
 export default function MiniApps() {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [activeApp, setActiveApp] = useState<AppKey | null>(null);
   const ref = useRef<HTMLDivElement>(null);
+
 
   useEffect(() => {
     if (!open) return;
