@@ -121,7 +121,7 @@ export default function AiAnalysis() {
       <div className="ew-ai-layout" style={{
         display: "grid", gridTemplateColumns: "minmax(220px, 22%) 1fr",
         gap: 16, alignItems: "stretch", minHeight: "calc(100vh - 140px)",
-      }}>
+      } as React.CSSProperties}>
         {/* Conversation history */}
         <aside style={{
           background: "var(--bg-surface)", border: "1px solid var(--border)",
