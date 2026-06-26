@@ -310,7 +310,7 @@ const AiAnalysisPanel = forwardRef<AiAnalysisHandle, Props>(function AiAnalysisP
                   key={a.label}
                   onClick={() => sendPrompt(a.prompt)}
                   style={{
-                    fontSize: 12, fontWeight: 600, padding: "8px 14px", borderRadius: 999,
+                    fontSize: 12, fontWeight: 600, padding: "8px 14px", borderRadius: 10,
                     border: "1px solid var(--border)", background: "var(--bg-elevated)",
                     color: "var(--text-primary)", cursor: "pointer", fontFamily: "inherit",
                   }}
@@ -318,6 +318,7 @@ const AiAnalysisPanel = forwardRef<AiAnalysisHandle, Props>(function AiAnalysisP
                   {a.label}
                 </button>
               ))}
+
             </div>
           </div>
         )}
