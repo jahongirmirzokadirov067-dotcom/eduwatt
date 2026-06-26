@@ -204,27 +204,29 @@ const AiAnalysisPanel = forwardRef<AiAnalysisHandle, Props>(function AiAnalysisP
     if (!tid) {
       tid = await onCreateThread();
       if (!tid) return;
-      // Give the thread-message hook a tick to refetch (would otherwise wipe optimistic UI)
-      await new Promise((r) => setTimeout(r, 80));
     }
     setInput("");
-    // Persist user message first (canonical), then mirror locally
-    try {
-      await append("user", trimmed);
-    } catch (e) {
-      console.error("[ai-chat] failed to save user message", e);
-    }
-    // Build history from the latest known messages + this user turn
-    const baseline = messagesRef.current;
-    const hasUserMsg = baseline.some((m) => m.role === "user" && m.content === trimmed);
-    const history = (hasUserMsg ? baseline : [...baseline, {
-      id: reqId, thread_id: tid, role: "user" as const,
+
+    // Optimistic local user message — instant render
+    const optimisticUserMsg: ChatMessage = {
+      id: reqId, thread_id: tid, role: "user",
       content: trimmed, created_at: new Date().toISOString(),
-    }]).map((m) => ({ role: m.role as any, content: m.content }));
+    };
+    const baseline = messagesRef.current;
+    const optimisticList = [...baseline, optimisticUserMsg];
+    setMessages(optimisticList);
+
+    // Persist user message in the background (do NOT block the AI request)
+    append("user", trimmed).catch((e) =>
+      console.error("[ai-chat] failed to save user message", e),
+    );
+
+    // Fire AI request immediately
+    const history = optimisticList.map((m) => ({ role: m.role as any, content: m.content }));
     await runStream(history, tid, reqId);
-    // Reconcile with DB after stream so any race with the thread refetch is healed
     if (isNewThread) refetchMessages();
   };
+
 
   useImperativeHandle(ref, () => ({ send: sendPrompt }), [threadId, ctx]);
 
