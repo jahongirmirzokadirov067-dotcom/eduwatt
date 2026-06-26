@@ -10,6 +10,7 @@ interface Zone {
   name: string;
   zone_type: string;
   current_kw: number;
+  grid_kwh: number;
 }
 
 const cardStyle: React.CSSProperties = {
@@ -59,7 +60,7 @@ export default function Zones() {
     if (!user || !newName.trim()) return;
     const { data, error } = await supabase
       .from("zones")
-      .insert({ user_id: user.id, name: newName.trim(), zone_type: newType, current_kw: 0 })
+      .insert({ user_id: user.id, name: newName.trim(), zone_type: newType, current_kw: 0, grid_kwh: 0 })
       .select()
       .single();
     if (error) return toast.error(error.message);
@@ -68,6 +69,14 @@ export default function Zones() {
     setNewType("normal");
     notifyZones();
     toast.success("Zone added");
+  };
+
+  const updateZoneField = async (id: string, field: "current_kw" | "grid_kwh", value: number) => {
+    const v = Number.isFinite(value) ? Math.max(0, value) : 0;
+    setZones((arr) => arr.map((z) => (z.id === id ? { ...z, [field]: v } : z)));
+    const { error } = await supabase.from("zones").update({ [field]: v }).eq("id", id);
+    if (error) return toast.error(error.message);
+    notifyZones();
   };
 
   const renameZone = async (id: string) => {
@@ -116,12 +125,14 @@ export default function Zones() {
 
       <div style={cardStyle}>
         <div style={labelStyle}>Zones</div>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+        <div className="eduwatt-scroll-x">
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, minWidth: 620 }}>
           <thead>
             <tr style={{ color: "var(--text-meta)", textAlign: "left", fontSize: 11, textTransform: "uppercase" }}>
               <th style={{ padding: "8px 6px" }}>Name</th>
               <th style={{ padding: "8px 6px" }}>Type</th>
-              <th style={{ padding: "8px 6px" }}>Current</th>
+              <th style={{ padding: "8px 6px" }}>Current kW</th>
+              <th style={{ padding: "8px 6px" }}>Grid kWh</th>
               <th style={{ padding: "8px 6px" }}>Status</th>
               <th style={{ padding: "8px 6px" }}></th>
             </tr>
@@ -151,7 +162,26 @@ export default function Zones() {
                     )}
                   </td>
                   <td style={{ padding: "10px 6px", textTransform: "capitalize" }}>{z.zone_type}</td>
-                  <td style={{ padding: "10px 6px" }}>{Number(z.current_kw).toFixed(1)} kW</td>
+                  <td style={{ padding: "10px 6px" }}>
+                    <input
+                      type="number"
+                      min={0}
+                      step={0.1}
+                      defaultValue={Number(z.current_kw).toFixed(1)}
+                      onBlur={(e) => updateZoneField(z.id, "current_kw", parseFloat(e.target.value))}
+                      style={{ width: 80, background: "var(--bg-elevated)", border: "1px solid var(--border)", color: "var(--text-primary)", padding: "4px 8px", borderRadius: 6, fontSize: 13 }}
+                    />
+                  </td>
+                  <td style={{ padding: "10px 6px" }}>
+                    <input
+                      type="number"
+                      min={0}
+                      step={1}
+                      defaultValue={Number(z.grid_kwh ?? 0).toFixed(0)}
+                      onBlur={(e) => updateZoneField(z.id, "grid_kwh", parseFloat(e.target.value))}
+                      style={{ width: 90, background: "var(--bg-elevated)", border: "1px solid var(--border)", color: "var(--text-primary)", padding: "4px 8px", borderRadius: 6, fontSize: 13 }}
+                    />
+                  </td>
                   <td style={{ padding: "10px 6px" }}>
                     {wasteFlag || z.zone_type === "waste" ? (
                       <span style={{ color: "#ff6b6b", fontSize: 11, fontWeight: 600 }}>⚠ WASTE</span>
@@ -172,6 +202,11 @@ export default function Zones() {
             })}
           </tbody>
         </table>
+        </div>
+
+        <div style={{ marginTop: 12, fontSize: 12, color: "var(--text-meta)" }}>
+          Total grid usage across zones: <strong style={{ color: "var(--text-primary)" }}>{zones.reduce((s, z) => s + Number(z.grid_kwh || 0), 0).toFixed(0)} kWh</strong>
+        </div>
 
         <div style={{ display: "flex", gap: 8, marginTop: 16, paddingTop: 16, borderTop: "1px solid var(--border-soft)" }}>
           <input
