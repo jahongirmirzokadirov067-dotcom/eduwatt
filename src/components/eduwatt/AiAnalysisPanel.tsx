@@ -271,14 +271,6 @@ const AiAnalysisPanel = forwardRef<AiAnalysisHandle, Props>(function AiAnalysisP
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <span style={{
-            fontSize: 10, fontWeight: 700, padding: "4px 10px", borderRadius: 999,
-            background: "color-mix(in srgb, var(--co2-color) 15%, transparent)",
-            color: "var(--co2-color)", display: "inline-flex", alignItems: "center", gap: 6,
-          }}>
-            <span style={{ width: 6, height: 6, borderRadius: 999, background: "var(--co2-color)" }} />
-            Connected
-          </span>
-          <span style={{
             fontSize: 10, fontWeight: 600, padding: "4px 10px", borderRadius: 999,
             background: "var(--bg-elevated)", color: "var(--text-secondary)",
             border: "1px solid var(--border)",
