@@ -2,7 +2,6 @@ import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/context/LanguageContext";
 import { useSchoolData } from "@/hooks/useSchoolData";
 import { useAuth } from "@/context/AuthContext";
-import MiniApps from "./MiniApps";
 
 export default function Topbar({ title, onMenuClick }: { title?: string; onMenuClick?: () => void }) {
   const { theme, toggle } = useTheme();
@@ -91,7 +90,6 @@ export default function Topbar({ title, onMenuClick }: { title?: string; onMenuC
           />
           <span style={{ fontSize: 11, color: "var(--text-muted)" }}>{t("topbar.live")}</span>
         </div>
-        <MiniApps />
         <button
           type="button"
           onClick={() => setLang(lang === "en" ? "uz" : "en")}

@@ -1,5 +1,6 @@
 import Sidebar from "@/components/eduwatt/Sidebar";
 import Topbar from "@/components/eduwatt/Topbar";
+import MiniApps from "@/components/eduwatt/MiniApps";
 import { ReactNode, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 
@@ -22,8 +23,11 @@ export default function Shell({ title, children }: { title: string; children: Re
         <div className="eduwatt-print-hide">
           <Topbar title={title} onMenuClick={() => setOpen(true)} />
         </div>
-        <main style={{ padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
+        <main style={{ padding: 24, display: "flex", flexDirection: "column", gap: 16, flex: 1 }}>
           {children}
+          <div style={{ marginTop: "auto", paddingTop: 16, display: "flex", justifyContent: "flex-end" }}>
+            <MiniApps />
+          </div>
         </main>
       </div>
     </div>
