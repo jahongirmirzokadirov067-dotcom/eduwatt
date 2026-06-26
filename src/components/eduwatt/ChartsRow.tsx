@@ -68,7 +68,7 @@ function SolarChart() {
             return (
               <div key={d.hour} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, height: "100%", justifyContent: "flex-end" }}>
                 <div style={{ fontSize: 10, color: "var(--text-faint)" }}>{d.kwh.toFixed(1)}</div>
-                <div style={{ width: "100%", height: `${Math.max(t * 100, 2)}%`, background: lerpColorCSS(t, "var(--accent-soft-bg)", "var(--accent)"), borderRadius: 2, minHeight: 4 }} />
+                <div style={{ width: "100%", height: `${Math.max(t * 100, 2)}%`, background: "var(--accent)", borderRadius: 2, minHeight: 4 }} />
                 <div style={{ fontSize: 10, color: "var(--text-faint)" }}>{d.hour}</div>
               </div>
             );
