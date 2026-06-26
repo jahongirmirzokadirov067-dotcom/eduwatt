@@ -74,10 +74,11 @@ function MessageBubble({ msg, onCopy, onRegenerate, onFeedback, isLast }: {
 }
 
 const iconBtn: React.CSSProperties = {
-  fontSize: 10, fontWeight: 600, padding: "3px 8px", borderRadius: 6,
+  fontSize: 10, fontWeight: 600, padding: "4px 9px", borderRadius: 8,
   border: "1px solid var(--border)", background: "transparent",
   color: "var(--text-meta)", cursor: "pointer", fontFamily: "inherit",
 };
+
 
 function extractFollowups(text: string): string[] {
   const m = text.match(/\*\*Follow-?ups?:?\*\*\s*([\s\S]*)$/i);
