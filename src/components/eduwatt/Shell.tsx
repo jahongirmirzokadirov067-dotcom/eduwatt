@@ -23,9 +23,21 @@ export default function Shell({ title, children }: { title: string; children: Re
         <div className="eduwatt-print-hide">
           <Topbar title={title} onMenuClick={() => setOpen(true)} />
         </div>
-        <main style={{ padding: 24, display: "flex", flexDirection: "column", gap: 16, flex: 1 }}>
+        <main style={{ padding: 24, display: "flex", flexDirection: "column", gap: 16, flex: 1, position: "relative" }}>
           {children}
-          <div style={{ marginTop: "auto", paddingTop: 16, display: "flex", justifyContent: "flex-end" }}>
+          <div
+            style={{
+              position: "sticky",
+              bottom: 20,
+              marginTop: "auto",
+              marginLeft: "auto",
+              marginRight: 0,
+              alignSelf: "flex-end",
+              width: "fit-content",
+              zIndex: 40,
+              pointerEvents: "auto",
+            }}
+          >
             <MiniApps />
           </div>
         </main>
